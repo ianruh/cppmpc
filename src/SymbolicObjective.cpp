@@ -19,8 +19,5 @@ namespace cppmpc {
         std::cout << "Hello World" << std::endl;
     }
 
-    void SymbolicObjective::print(const RCP<const Basic> &basic) {
-        std::cout << SymEngine::str(*basic.get()) << std::endl;
-    }
 
 } // namespace cppmpc

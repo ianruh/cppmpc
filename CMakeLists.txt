@@ -53,6 +53,8 @@ INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 add_library(cppmpc
     src/SymbolicObjective.cpp
     include/SymbolicObjective.hpp
+    src/SymEngineUtilities.cpp
+    include/SymEngineUtilities.hpp
 )
 target_include_directories(cppmpc PUBLIC include/)
 target_link_libraries(cppmpc symengine gmp)

@@ -37,6 +37,8 @@ using SymEngine::Basic;
 
 // Python --> C
 %typemap(in) const RCP<const Basic>& {
+    //TODO(iruh): This leaks memory. Not sure when I can delete it though, as
+    // it needs to still be valid when the pointer to the RCP gets dereferenced.
     CRCPBasic* rcp_basic = new CRCPBasic;
     PyObject* capsule = PyCapsule_New(rcp_basic, NULL, NULL);
     PyObject* args = PyTuple_Pack(2, capsule, $input);
@@ -48,20 +50,21 @@ using SymEngine::Basic;
 
 // C --> Python
 %typemap(out) const RCP<const Basic>& {
-    // Check how this impacts memory management
+    // Check how this impacts memory management, same as above.
     CRCPBasic* rcp_basic;
     rcp_basic = (CRCPBasic*)$1;
     PyObject* capsule = PyCapsule_New(rcp_basic, NULL, NULL);
     PyObject* args = PyTuple_Pack(1, capsule);
 
-    PyObject* basic = PyObject_CallObject(capsule_to_basic, args);
+    PyObject* basic = PyObject_CallObject(capsule_to_basic_func, args);
 
     $result = basic;
-    delete rcp_basic;
 }
 
 %{
 #include "SymbolicObjective.hpp"
+#include "SymEngineUtilities.hpp"
 %}
 
 %include "SymbolicObjective.hpp"
+%include "SymEngineUtilities.hpp"

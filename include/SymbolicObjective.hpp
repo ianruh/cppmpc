@@ -13,9 +13,6 @@ namespace cppmpc {
         // Constructors
         public:
             SymbolicObjective();
-
-            void print(const RCP<const Basic> &basic);
-
     };
 
 } // namespace cppmpc
