@@ -73,6 +73,11 @@ set_property(TARGET cppmpc_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRU
 swig_link_libraries(cppmpc_swig PRIVATE cppmpc symengine)
 target_compile_options(cppmpc_swig PRIVATE "-Wno-unused-variable" "-Wno-maybe-uninitialized")
 
+# Because this is being loaded by python, you need to set LD_PRELOAD as well:
+# LD_PRELOAD=$(gcc -print-file-name=libasan.so)
+#target_compile_options(cppmpc_swig PRIVATE "-fsanitize=address")
+#target_link_options(cppmpc_swig PRIVATE "-fsanitize=address")
+
 # For some reason setting CMAKE_SWIG_OUTDIR doesn't effect where the shared
 # library gets written, so we change it manually here. The _cppmpc_swig target
 # is what is created by swig when we add the library.
@@ -81,7 +86,7 @@ set_property(TARGET cppmpc_swig PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SWIG_O
 ######## Executables ########
 
 add_executable(example1 src/Examples/example1.cpp)
-target_link_libraries(example1 PRIVATE cppmpc)
+target_link_libraries(example1 PRIVATE cppmpc symengine)
 
 ######## Tests ########
 enable_testing()

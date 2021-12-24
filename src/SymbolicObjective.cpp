@@ -6,6 +6,7 @@
 #include <symengine/number.h>
 #include <symengine/add.h>
 #include <symengine/mul.h>
+#include <symengine/printers.h>
 
 using SymEngine::RCP;
 using SymEngine::Basic;
@@ -19,7 +20,7 @@ namespace cppmpc {
     }
 
     void SymbolicObjective::print(const RCP<const Basic> &basic) {
-        std::cout << *basic.ptr() << std::endl;
+        std::cout << SymEngine::str(*basic.get()) << std::endl;
     }
 
 } // namespace cppmpc

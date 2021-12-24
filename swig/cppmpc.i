@@ -14,7 +14,7 @@ using SymEngine::Basic;
 // Matching the struct in symengine.py
 typedef struct {
     RCP<const Basic> m;
-} CRPCBasic;
+} CRCPBasic;
 
 
 PyObject* wrapper_module_string = PyString_FromString(
@@ -31,28 +31,33 @@ PyObject* capsule_to_basic_func = PyObject_GetAttrString(
 using SymEngine::RCP;
 using SymEngine::Basic;
 
+// Note that, as mentioned [here](http://www.swig.org/Doc2.0/SWIGPlus.html#SWIGPlus_nn18)
+// SWIG converts references to pointers, so the types of $1 below is actually a
+// pointer.
+
 // Python --> C
-%typemap(in) RCP<const Basic>& {
-    CRPCBasic rcp_basic;
-    PyObject* capsule = PyCapsule_New(&rcp_basic, NULL, NULL);
+%typemap(in) const RCP<const Basic>& {
+    CRCPBasic* rcp_basic = new CRCPBasic;
+    PyObject* capsule = PyCapsule_New(rcp_basic, NULL, NULL);
     PyObject* args = PyTuple_Pack(2, capsule, $input);
 
     PyObject* call_result = PyObject_CallObject(assign_to_capsule_func, args);
 
-    $1 = &rcp_basic.m;
+    $1 = &rcp_basic->m;
 }
 
 // C --> Python
-%typemap(out) RCP<const Basic>& {
+%typemap(out) const RCP<const Basic>& {
     // Check how this impacts memory management
-    CRCPBasic rcp_basic;
-    rcp_basic.m = $1;
-    PyObject* capsule = PyCapsule_New(&rcp_basic, NULL, NULL);
+    CRCPBasic* rcp_basic;
+    rcp_basic = (CRCPBasic*)$1;
+    PyObject* capsule = PyCapsule_New(rcp_basic, NULL, NULL);
     PyObject* args = PyTuple_Pack(1, capsule);
 
     PyObject* basic = PyObject_CallObject(capsule_to_basic, args);
 
     $result = basic;
+    delete rcp_basic;
 }
 
 %{
