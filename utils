@@ -208,7 +208,9 @@ sub_clean() {
         rm -rf ./build/
     fi
 
-    rm ./cppmpc_py/_cppmpc_swig.so
+    rm -f ./cppmpc_py/_cppmpc_swig.so
+    rm -f ./cppmpc_py/cppmpc.py
+    rm -f ./cppmpc_py/cppmpcPYTHON_wrap.cxx
 
     cd "$original_wd"
 }

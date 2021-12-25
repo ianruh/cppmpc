@@ -5,11 +5,24 @@
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
 
+#include <string>
+#include <unordered_set>
+
+namespace cppmpc {
+
 using SymEngine::Basic;
 using SymEngine::RCP;
 using SymEngine::Symbol;
 
-namespace cppmpc {
+typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
+                           SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
+        UnorderedSetSymbol;
+
+// Create a symbol with the `$v_` prefix indicating it is an active variable
+RCP<const Symbol> variable(const std::string& name);
+
+// Create a symbol with th `$p_` prefix indicating it is not an active variable
+RCP<const Symbol> parameter(const std::string& name);
 
 namespace Utility {
 
@@ -17,10 +30,20 @@ namespace Utility {
 // and from RCP<const Basic>.
 const RCP<const Basic>& echo(const RCP<const Basic>& basic);
 
+// Get the variables in a given basic. All variables are just symbols whose
+// names begin with `$v_`.
+//
+// For example, a variable named `x`, is a symbol with name `$v_x`.
+UnorderedSetSymbol getVariables(const RCP<const Basic>& basic);
+
+// Get the parameters in a given basic. All parameters are just symbols whose
+// names begin with `$p_`.
+//
+// For example, a parameter named `i`, is a symbol with name `$p_i`.
+UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
+
 }  // namespace Utility
 
 }  // namespace cppmpc
-
-bool operator<(const RCP<const Symbol> a, const RCP<const Symbol> b);
 
 #endif  // INCLUDE_SYMENGINEUTILITIES_H_

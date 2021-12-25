@@ -4,6 +4,7 @@
 #include <symengine/basic.h>
 #include <symengine/mul.h>
 #include <symengine/symbol.h>
+
 #include <unordered_set>
 
 #include "GetSymbolsVisitor.h"

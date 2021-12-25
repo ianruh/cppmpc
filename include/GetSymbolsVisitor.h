@@ -8,19 +8,9 @@
 
 #include <unordered_set>
 
+#include "SymEngineUtilities.h"
+
 namespace cppmpc {
-
-typedef std::unordered_set<SymEngine::RCP<const SymEngine::Basic>,
-                           SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
-        UnorderedSetBasic;
-
-typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
-                           SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
-        UnorderedSetSymbol;
-
-using SymEngine::Basic;
-using SymEngine::RCP;
-using SymEngine::Symbol;
 
 // This visitor retrieves all of the symbols in the given basic.
 class GetSymbolsVisitor : public SymEngine::BaseVisitor<GetSymbolsVisitor> {
@@ -29,14 +19,13 @@ class GetSymbolsVisitor : public SymEngine::BaseVisitor<GetSymbolsVisitor> {
 
  public:
     GetSymbolsVisitor() {}
-    void bvisit(const Symbol &x);
-    void bvisit(const Basic &b);
+    void bvisit(const SymEngine::Symbol &x);
+    void bvisit(const SymEngine::Basic &b);
 
-    UnorderedSetSymbol apply(const Basic &b);
+    UnorderedSetSymbol apply(const SymEngine::Basic &b);
 };
 
-UnorderedSetSymbol getSymbols(
-        const SymEngine::RCP<const SymEngine::Basic> &basic);
+UnorderedSetSymbol getSymbols(const RCP<const Basic> &basic);
 
 }  // namespace cppmpc
 

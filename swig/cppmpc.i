@@ -7,10 +7,10 @@
 #include "Python.h"
 #include "symengine/basic.h"
 #include "stdio.h"
-#include <unordered_set>
 
 using SymEngine::RCP;
 using SymEngine::Basic;
+using SymEngine::Symbol;
 
 // Matching the struct in symengine.py
 typedef struct {
@@ -31,12 +31,13 @@ PyObject* capsule_to_basic_func = PyObject_GetAttrString(
 
 using SymEngine::RCP;
 using SymEngine::Basic;
+using SymEngine::Symbol;
 
 // Note that, as mentioned [here](http://www.swig.org/Doc2.0/SWIGPlus.html#SWIGPlus_nn18)
 // SWIG converts references to pointers, so the types of $1 below is actually a
 // pointer.
 
-// Python --> C++
+// Python --> C
 %typemap(in) RCP<const Basic>& {
     //TODO(iruh): This leaks memory. Not sure when I can delete it though, as
     // it needs to still be valid when the pointer to the RCP gets dereferenced.
@@ -49,7 +50,7 @@ using SymEngine::Basic;
     $1 = &rcp_basic->m;
 }
 
-// C++ --> Python
+// C --> Python
 %typemap(out) RCP<const Basic>& {
     // Check how this impacts memory management, same as above.
     CRCPBasic* rcp_basic;
@@ -65,9 +66,7 @@ using SymEngine::Basic;
 // The pattern matching is not very smart apparently
 %typemap(in) SymEngine::RCP<const SymEngine::Basic>& = RCP<const Basic>&;
 %typemap(out) SymEngine::RCP<const SymEngine::Basic>& = RCP<const Basic>&;
-
-// Python --> C++
-// TODO(iruh): Get the type maps for unordered sets working (e.g. getSymbols)
+// TODO(iruh): Typemap for unordered set of basics
 // %typemap(in) std::unordered_set<SWIGTYPE, SWIGTYPE, SWIGTYPE>
 
 %{

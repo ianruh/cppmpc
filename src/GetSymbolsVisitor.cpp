@@ -4,34 +4,34 @@
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
 
-#include <unordered_set>
 #include <iostream>
+#include <unordered_set>
 
-using SymEngine::Basic;
-using SymEngine::make_rcp;
-using SymEngine::RCP;
-using SymEngine::Symbol;
+#include "SymEngineUtilities.h"
 
 namespace cppmpc {
 
-void GetSymbolsVisitor::bvisit(const Symbol &x) {
+using SymEngine::Basic;
+using SymEngine::RCP;
+using SymEngine::Symbol;
+
+void GetSymbolsVisitor::bvisit(const SymEngine::Symbol &x) {
     this->symbols.insert(SymEngine::symbol(x.get_name()));
 }
 
-void GetSymbolsVisitor::bvisit(const Basic &b) {
+void GetSymbolsVisitor::bvisit(const SymEngine::Basic &b) {
     std::cout << b << std::endl;
-    for(const auto &p : b.get_args()) {
+    for (const auto &p : b.get_args()) {
         p->accept(*this);
     }
 }
 
-UnorderedSetSymbol GetSymbolsVisitor::apply(const Basic &b) {
+UnorderedSetSymbol GetSymbolsVisitor::apply(const SymEngine::Basic &b) {
     b.accept(*this);
     return this->symbols;
 }
 
-UnorderedSetSymbol getSymbols(
-        const SymEngine::RCP<const SymEngine::Basic> &basic) {
+UnorderedSetSymbol getSymbols(const RCP<const Basic> &basic) {
     GetSymbolsVisitor visitor;
     return visitor.apply(*basic.get());
 }
