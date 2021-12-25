@@ -136,5 +136,25 @@ _cppmpc_swig.SymbolicObjective_swigregister(SymbolicObjective)
 
 def echo(basic):
     return _cppmpc_swig.echo(basic)
+class GetSymbolsVisitor(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        _cppmpc_swig.GetSymbolsVisitor_swiginit(self, _cppmpc_swig.new_GetSymbolsVisitor())
+
+    def bvisit(self, *args):
+        return _cppmpc_swig.GetSymbolsVisitor_bvisit(self, *args)
+
+    def apply(self, b):
+        return _cppmpc_swig.GetSymbolsVisitor_apply(self, b)
+    __swig_destroy__ = _cppmpc_swig.delete_GetSymbolsVisitor
+
+# Register GetSymbolsVisitor in _cppmpc_swig:
+_cppmpc_swig.GetSymbolsVisitor_swigregister(GetSymbolsVisitor)
+
+
+def getSymbols(basic):
+    return _cppmpc_swig.getSymbols(basic)
 
 

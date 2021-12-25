@@ -10,6 +10,8 @@
 - clang-format
 - black
 - cpplint
+- ripgrep
+- fzf
 
 **Python Wrappers Setup**
 

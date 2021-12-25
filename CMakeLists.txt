@@ -95,10 +95,12 @@ target_link_libraries(example1 PRIVATE cppmpc symengine)
 ######## Tests ########
 enable_testing()
 
-add_executable(SymbolicObjectiveTests tests/SymbolicObjectiveTests.cpp)
-target_link_libraries(SymbolicObjectiveTests cppmpc gtest_main)
+add_executable(SymbolicTests
+    tests/SymbolicObjectiveTest.cpp
+    tests/GetSymbolsVisitorTest.cpp)
+target_link_libraries(SymbolicTests cppmpc gtest_main symengine)
 
 include(GoogleTest)
-gtest_discover_tests(SymbolicObjectiveTests)
+gtest_discover_tests(SymbolicTests)
 
 

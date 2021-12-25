@@ -1,0 +1,258 @@
+#!/bin/bash
+
+ProgName=$(basename $0)
+CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
+  
+sub_help(){
+    echo "Usage: $ProgName <subcommand> [options]\n"
+    echo "Subcommands:"
+    echo "    build        Build the library"
+    echo "    clean        Clean all build artifacts"
+    echo "    cpplint      Lint all of the c++ code using cpplint"
+    echo "    copyright    Place the copyright at the top of all source files"
+    echo "    format       Format all code using flake8 and clang-format"
+    echo "    format-cpp   Format c/c++ code using clang-format"
+    echo "    format-py    Format python code using flake8"
+    echo "    todo         Search todos in the code"
+    echo "    test         Run all C++ and python tests"
+    echo ""
+    echo "For help with each subcommand run:"
+    echo "$ProgName <subcommand> -h|--help"
+    echo ""
+}
+
+# Get a section title string
+#
+# Args:
+#   $1: Section name
+util_section_header() {
+    echo ""
+    echo "############### $1 ################"
+}
+
+# Run all of the python and C++ tests.
+#
+# Args: None
+sub_test() {
+    
+    util_section_header "Building"
+    # Build first
+    sub_build
+ 
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        return 1;
+    fi
+
+    # Then do testing stuffs
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_section_header "C++ Tests"
+    cd ./build/
+    ctest
+
+    util_section_header "Python Tests"
+    cd ../
+    pytest
+
+    cd "$original_wd"
+}
+
+sub_todo() { 
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    # If the terminal is too narrow, then put the preview below
+    width=$(tput cols)
+    preview_loc='right:70%'
+    if (( width < 100 )); then
+        preview_loc='down:50%'
+    fi
+
+	file_line=$(rg -g '!utils' \
+        -g '!cppmpc_py/cppmpc.py' \
+        -g '!cppmpc_py/cppmpcPYTHON_wrap.cxx' \
+        -n \
+        "TODO" | \
+        fzf --sort --preview="util_search_preview {1} {2} {q}" \
+			--query "$query" \
+			--bind "tab:down,btab:up" \
+            --preview-window "wrap:$preview_loc" \
+            --height=30% \
+            --min-height=30 \
+            --ansi \
+            -d ':' \
+            --nth 3,4 \
+            --with-nth 1,2,3,4 \
+            --reverse)
+    
+    # Stop if they hit Ctrl-C
+    if [[ "$?" != "0" ]]; then
+        return;
+    fi
+    
+    file_path=$(echo $file_line | cut -d : -f 1)
+    line_number=$(echo $file_line | cut -d : -f 2)
+
+    echo "$file_path:$line_number"
+
+    cd "$original_wd"
+}
+
+# Args
+#   $1: The file path
+#   $2: The line number
+#   $3: The query string
+util_search_preview() {
+    # Handle no selection that matches query
+    if [[ "$1" == "" ]]; then
+        return
+    fi
+
+    util_bat_preview_line "$1" $2
+}
+export -f util_search_preview
+
+# Preview line in file in bat
+# Args:
+#   $1: The file path
+#   $2: The line number
+util_bat_preview_line() {
+    bg_yellow="[43m"
+    ansi_reset="[49m"
+    num_context=7
+    first_line=$(($2 - $num_context))
+    if (( $first_line < 0 )); then
+        first_line=0
+        num_context=$(($num_context + $num_context - $2))
+    fi
+
+    batcat -n --color=always \
+        --line-range $first_line:$(($first_line + $num_context + $num_context)) \
+        -H $2 \
+        --wrap character \
+        --terminal-width $(($(tput cols) - 4)) \
+        "$1"
+}
+export -f util_bat_preview_line
+
+sub_copyright() {
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    for i in $(fd ".*\.($CPP_EXTENSIONS)" ./src/ ./include/ ./tests/); do
+        if ! grep -q Copyright "$i"; then
+            cat ./copyright.txt "$i" > "$i.new"
+            mv "$i.new" "$i"
+        fi
+    done
+
+    cd "$original_wd"
+}
+
+sub_cpplint() { 
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    fd ".*\.($CPP_EXTENSIONS)" ./src/ ./include/ ./tests/ | xargs cpplint
+
+    result="$?"
+
+    cd "$original_wd"
+
+    return $result
+}
+
+sub_build() { 
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    if [ -d ./build/ ]; then
+        cd ./build/
+    else
+        mkdir ./build/
+        cd ./build/
+    fi
+
+    cmake ..
+    
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        cd "$original_wd"
+        return 1;
+    fi
+
+    make -j8
+
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        cd "$original_wd"
+        return 1;
+    fi
+
+    cd "$original_wd"
+}
+
+sub_clean() { 
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    if [ -d ./build/ ]; then
+        rm -rf ./build/
+    fi
+
+    rm ./cppmpc_py/_cppmpc_swig.so
+
+    cd "$original_wd"
+}
+
+sub_format() {
+    sub_format-py
+    sub_format-cpp
+}
+  
+sub_format-cpp(){
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+    fd ".*\.($CPP_EXTENSIONS)" ./include/ ./src/ ./tests/ | \
+        xargs clang-format -i
+
+    cd "$original_wd"
+}
+
+sub_format-py(){
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+    fd ".*\.(py)" ./tests/ | \
+        xargs black
+
+    cd "$original_wd"
+}
+ 
+subcommand=$1
+case $subcommand in
+    "" | "-h" | "--help")
+        sub_help
+        ;;
+    *)
+        shift
+        sub_${subcommand} $@
+        ret_val=$?
+        if [ $ret_val = 127 ]; then
+            echo "Error: '$subcommand' is not a known subcommand." >&2
+            echo "       Run '$ProgName --help' for a list of known subcommands." >&2
+            exit 1
+        elif [ $ret_val = 1 ]; then
+            exit 1
+        fi
+        ;;
+esac

@@ -2660,13 +2660,19 @@ SWIGINTERN PyObject *SWIG_PyStaticMethod_New(PyObject *SWIGUNUSEDPARM(self), PyO
 
 /* -------- TYPES TABLE (BEGIN) -------- */
 
-#define SWIGTYPE_p_RCPT_Basic_const_t swig_types[0]
-#define SWIGTYPE_p_char swig_types[1]
-#define SWIGTYPE_p_cppmpc__SymbolicObjective swig_types[2]
-#define SWIGTYPE_p_std__invalid_argument swig_types[3]
-#define SWIGTYPE_p_swig__SwigPyIterator swig_types[4]
-static swig_type_info *swig_types[6];
-static swig_module_info swig_module = {swig_types, 5, 0, 0, 0, 0};
+#define SWIGTYPE_p_Basic swig_types[0]
+#define SWIGTYPE_p_RCPT_Basic_const_t swig_types[1]
+#define SWIGTYPE_p_SymEngine__RCPT_SymEngine__Basic_const_t swig_types[2]
+#define SWIGTYPE_p_Symbol swig_types[3]
+#define SWIGTYPE_p_char swig_types[4]
+#define SWIGTYPE_p_cppmpc__GetSymbolsVisitor swig_types[5]
+#define SWIGTYPE_p_cppmpc__SymbolicObjective swig_types[6]
+#define SWIGTYPE_p_std__invalid_argument swig_types[7]
+#define SWIGTYPE_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t swig_types[8]
+#define SWIGTYPE_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t swig_types[9]
+#define SWIGTYPE_p_swig__SwigPyIterator swig_types[10]
+static swig_type_info *swig_types[12];
+static swig_module_info swig_module = {swig_types, 11, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3290,6 +3296,7 @@ SWIG_AsVal_ptrdiff_t (PyObject * obj, ptrdiff_t *val)
 #include "Python.h"
 #include "symengine/basic.h"
 #include "stdio.h"
+#include <unordered_set>
 
 using SymEngine::RCP;
 using SymEngine::Basic;
@@ -3313,6 +3320,7 @@ PyObject* capsule_to_basic_func = PyObject_GetAttrString(
 
 #include "SymbolicObjective.h"
 #include "SymEngineUtilities.h"
+#include "GetSymbolsVisitor.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -4206,6 +4214,218 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_new_GetSymbolsVisitor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cppmpc::GetSymbolsVisitor *result = 0 ;
+  
+  if (!SWIG_Python_UnpackTuple(args, "new_GetSymbolsVisitor", 0, 0, 0)) SWIG_fail;
+  result = (cppmpc::GetSymbolsVisitor *)new cppmpc::GetSymbolsVisitor();
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_cppmpc__GetSymbolsVisitor, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GetSymbolsVisitor_bvisit__SWIG_0(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  cppmpc::GetSymbolsVisitor *arg1 = (cppmpc::GetSymbolsVisitor *) 0 ;
+  Symbol *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_cppmpc__GetSymbolsVisitor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetSymbolsVisitor_bvisit" "', argument " "1"" of type '" "cppmpc::GetSymbolsVisitor *""'"); 
+  }
+  arg1 = reinterpret_cast< cppmpc::GetSymbolsVisitor * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Symbol,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GetSymbolsVisitor_bvisit" "', argument " "2"" of type '" "Symbol const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "GetSymbolsVisitor_bvisit" "', argument " "2"" of type '" "Symbol const &""'"); 
+  }
+  arg2 = reinterpret_cast< Symbol * >(argp2);
+  (arg1)->bvisit((Symbol const &)*arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GetSymbolsVisitor_bvisit__SWIG_1(PyObject *SWIGUNUSEDPARM(self), Py_ssize_t nobjs, PyObject **swig_obj) {
+  PyObject *resultobj = 0;
+  cppmpc::GetSymbolsVisitor *arg1 = (cppmpc::GetSymbolsVisitor *) 0 ;
+  Basic *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  
+  if ((nobjs < 2) || (nobjs > 2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_cppmpc__GetSymbolsVisitor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetSymbolsVisitor_bvisit" "', argument " "1"" of type '" "cppmpc::GetSymbolsVisitor *""'"); 
+  }
+  arg1 = reinterpret_cast< cppmpc::GetSymbolsVisitor * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Basic,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GetSymbolsVisitor_bvisit" "', argument " "2"" of type '" "Basic const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "GetSymbolsVisitor_bvisit" "', argument " "2"" of type '" "Basic const &""'"); 
+  }
+  arg2 = reinterpret_cast< Basic * >(argp2);
+  (arg1)->bvisit((Basic const &)*arg2);
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_GetSymbolsVisitor_bvisit(PyObject *self, PyObject *args) {
+  Py_ssize_t argc;
+  PyObject *argv[3] = {
+    0
+  };
+  
+  if (!(argc = SWIG_Python_UnpackTuple(args, "GetSymbolsVisitor_bvisit", 0, 2, argv))) SWIG_fail;
+  --argc;
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_cppmpc__GetSymbolsVisitor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Symbol, SWIG_POINTER_NO_NULL | 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_GetSymbolsVisitor_bvisit__SWIG_0(self, argc, argv);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    void *vptr = 0;
+    int res = SWIG_ConvertPtr(argv[0], &vptr, SWIGTYPE_p_cppmpc__GetSymbolsVisitor, 0);
+    _v = SWIG_CheckState(res);
+    if (_v) {
+      int res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_Basic, SWIG_POINTER_NO_NULL | 0);
+      _v = SWIG_CheckState(res);
+      if (_v) {
+        return _wrap_GetSymbolsVisitor_bvisit__SWIG_1(self, argc, argv);
+      }
+    }
+  }
+  
+fail:
+  SWIG_Python_RaiseOrModifyTypeError("Wrong number or type of arguments for overloaded function 'GetSymbolsVisitor_bvisit'.\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    cppmpc::GetSymbolsVisitor::bvisit(Symbol const &)\n"
+    "    cppmpc::GetSymbolsVisitor::bvisit(Basic const &)\n");
+  return 0;
+}
+
+
+SWIGINTERN PyObject *_wrap_GetSymbolsVisitor_apply(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cppmpc::GetSymbolsVisitor *arg1 = (cppmpc::GetSymbolsVisitor *) 0 ;
+  Basic *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject *swig_obj[2] ;
+  cppmpc::UnorderedSetSymbol result;
+  
+  if (!SWIG_Python_UnpackTuple(args, "GetSymbolsVisitor_apply", 2, 2, swig_obj)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_cppmpc__GetSymbolsVisitor, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "GetSymbolsVisitor_apply" "', argument " "1"" of type '" "cppmpc::GetSymbolsVisitor *""'"); 
+  }
+  arg1 = reinterpret_cast< cppmpc::GetSymbolsVisitor * >(argp1);
+  res2 = SWIG_ConvertPtr(swig_obj[1], &argp2, SWIGTYPE_p_Basic,  0  | 0);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "GetSymbolsVisitor_apply" "', argument " "2"" of type '" "Basic const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "GetSymbolsVisitor_apply" "', argument " "2"" of type '" "Basic const &""'"); 
+  }
+  arg2 = reinterpret_cast< Basic * >(argp2);
+  result = (arg1)->apply((Basic const &)*arg2);
+  resultobj = SWIG_NewPointerObj((new cppmpc::UnorderedSetSymbol(static_cast< const cppmpc::UnorderedSetSymbol& >(result))), SWIGTYPE_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_GetSymbolsVisitor(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  cppmpc::GetSymbolsVisitor *arg1 = (cppmpc::GetSymbolsVisitor *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject *swig_obj[1] ;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  res1 = SWIG_ConvertPtr(swig_obj[0], &argp1,SWIGTYPE_p_cppmpc__GetSymbolsVisitor, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_GetSymbolsVisitor" "', argument " "1"" of type '" "cppmpc::GetSymbolsVisitor *""'"); 
+  }
+  arg1 = reinterpret_cast< cppmpc::GetSymbolsVisitor * >(argp1);
+  delete arg1;
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *GetSymbolsVisitor_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!SWIG_Python_UnpackTuple(args, "swigregister", 1, 1, &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_cppmpc__GetSymbolsVisitor, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *GetSymbolsVisitor_swiginit(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  return SWIG_Python_InitShadowInstance(args);
+}
+
+SWIGINTERN PyObject *_wrap_getSymbols(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  SymEngine::RCP< SymEngine::Basic const > *arg1 = 0 ;
+  PyObject *swig_obj[1] ;
+  cppmpc::UnorderedSetSymbol result;
+  
+  if (!args) SWIG_fail;
+  swig_obj[0] = args;
+  {
+    //TODO(iruh): This leaks memory. Not sure when I can delete it though, as
+    // it needs to still be valid when the pointer to the RCP gets dereferenced.
+    CRCPBasic* rcp_basic = new CRCPBasic;
+    PyObject* capsule = PyCapsule_New(rcp_basic, NULL, NULL);
+    PyObject* args = PyTuple_Pack(2, capsule, swig_obj[0]);
+    
+    PyObject* call_result = PyObject_CallObject(assign_to_capsule_func, args);
+    
+    arg1 = &rcp_basic->m;
+  }
+  result = cppmpc::getSymbols((SymEngine::RCP< SymEngine::Basic const > const &)*arg1);
+  resultobj = SWIG_NewPointerObj((new cppmpc::UnorderedSetSymbol(static_cast< const cppmpc::UnorderedSetSymbol& >(result))), SWIGTYPE_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t, SWIG_POINTER_OWN |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 static PyMethodDef SwigMethods[] = {
 	 { "SWIG_PyInstanceMethod_New", SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { "delete_SwigPyIterator", _wrap_delete_SwigPyIterator, METH_O, NULL},
@@ -4231,6 +4451,13 @@ static PyMethodDef SwigMethods[] = {
 	 { "SymbolicObjective_swigregister", SymbolicObjective_swigregister, METH_O, NULL},
 	 { "SymbolicObjective_swiginit", SymbolicObjective_swiginit, METH_VARARGS, NULL},
 	 { "echo", _wrap_echo, METH_O, NULL},
+	 { "new_GetSymbolsVisitor", _wrap_new_GetSymbolsVisitor, METH_NOARGS, NULL},
+	 { "GetSymbolsVisitor_bvisit", _wrap_GetSymbolsVisitor_bvisit, METH_VARARGS, NULL},
+	 { "GetSymbolsVisitor_apply", _wrap_GetSymbolsVisitor_apply, METH_VARARGS, NULL},
+	 { "delete_GetSymbolsVisitor", _wrap_delete_GetSymbolsVisitor, METH_O, NULL},
+	 { "GetSymbolsVisitor_swigregister", GetSymbolsVisitor_swigregister, METH_O, NULL},
+	 { "GetSymbolsVisitor_swiginit", GetSymbolsVisitor_swiginit, METH_VARARGS, NULL},
+	 { "getSymbols", _wrap_getSymbols, METH_O, NULL},
 	 { NULL, NULL, 0, NULL }
 };
 
@@ -4241,31 +4468,55 @@ static PyMethodDef SwigMethods_proxydocs[] = {
 
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
+static swig_type_info _swigt__p_Basic = {"_p_Basic", "Basic *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_RCPT_Basic_const_t = {"_p_RCPT_Basic_const_t", "RCP< Basic const > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_SymEngine__RCPT_SymEngine__Basic_const_t = {"_p_SymEngine__RCPT_SymEngine__Basic_const_t", "SymEngine::RCP< SymEngine::Basic const > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_Symbol = {"_p_Symbol", "Symbol *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_cppmpc__GetSymbolsVisitor = {"_p_cppmpc__GetSymbolsVisitor", "cppmpc::GetSymbolsVisitor *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_cppmpc__SymbolicObjective = {"_p_cppmpc__SymbolicObjective", "cppmpc::SymbolicObjective *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__invalid_argument = {"_p_std__invalid_argument", "std::invalid_argument *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t = {"_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t", "std::unordered_set< SymEngine::RCP< SymEngine::Basic const >,SymEngine::RCPBasicHash,SymEngine::RCPBasicKeyEq > *|cppmpc::UnorderedSetBasic *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t = {"_p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t", "std::unordered_set< SymEngine::RCP< SymEngine::Symbol const >,SymEngine::RCPBasicHash,SymEngine::RCPBasicKeyEq > *|cppmpc::UnorderedSetSymbol *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_swig__SwigPyIterator = {"_p_swig__SwigPyIterator", "swig::SwigPyIterator *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
+  &_swigt__p_Basic,
   &_swigt__p_RCPT_Basic_const_t,
+  &_swigt__p_SymEngine__RCPT_SymEngine__Basic_const_t,
+  &_swigt__p_Symbol,
   &_swigt__p_char,
+  &_swigt__p_cppmpc__GetSymbolsVisitor,
   &_swigt__p_cppmpc__SymbolicObjective,
   &_swigt__p_std__invalid_argument,
+  &_swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t,
+  &_swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t,
   &_swigt__p_swig__SwigPyIterator,
 };
 
+static swig_cast_info _swigc__p_Basic[] = {  {&_swigt__p_Basic, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_RCPT_Basic_const_t[] = {  {&_swigt__p_RCPT_Basic_const_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_SymEngine__RCPT_SymEngine__Basic_const_t[] = {  {&_swigt__p_SymEngine__RCPT_SymEngine__Basic_const_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Symbol[] = {  {&_swigt__p_Symbol, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_cppmpc__GetSymbolsVisitor[] = {  {&_swigt__p_cppmpc__GetSymbolsVisitor, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_cppmpc__SymbolicObjective[] = {  {&_swigt__p_cppmpc__SymbolicObjective, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__invalid_argument[] = {  {&_swigt__p_std__invalid_argument, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t[] = {  {&_swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t[] = {  {&_swigt__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_swig__SwigPyIterator[] = {  {&_swigt__p_swig__SwigPyIterator, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
+  _swigc__p_Basic,
   _swigc__p_RCPT_Basic_const_t,
+  _swigc__p_SymEngine__RCPT_SymEngine__Basic_const_t,
+  _swigc__p_Symbol,
   _swigc__p_char,
+  _swigc__p_cppmpc__GetSymbolsVisitor,
   _swigc__p_cppmpc__SymbolicObjective,
   _swigc__p_std__invalid_argument,
+  _swigc__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Basic_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t,
+  _swigc__p_std__unordered_setT_SymEngine__RCPT_SymEngine__Symbol_const_t_SymEngine__RCPBasicHash_SymEngine__RCPBasicKeyEq_t,
   _swigc__p_swig__SwigPyIterator,
 };
 

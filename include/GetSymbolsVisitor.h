@@ -30,10 +30,13 @@ class GetSymbolsVisitor : public SymEngine::BaseVisitor<GetSymbolsVisitor> {
  public:
     GetSymbolsVisitor() {}
     void bvisit(const Symbol &x);
-    void bvisit(const Basic &) {}
+    void bvisit(const Basic &b);
 
     UnorderedSetSymbol apply(const Basic &b);
 };
+
+UnorderedSetSymbol getSymbols(
+        const SymEngine::RCP<const SymEngine::Basic> &basic);
 
 }  // namespace cppmpc
 

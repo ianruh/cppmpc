@@ -7,6 +7,7 @@
 #include "Python.h"
 #include "symengine/basic.h"
 #include "stdio.h"
+#include <unordered_set>
 
 using SymEngine::RCP;
 using SymEngine::Basic;
@@ -35,8 +36,8 @@ using SymEngine::Basic;
 // SWIG converts references to pointers, so the types of $1 below is actually a
 // pointer.
 
-// Python --> C
-%typemap(in) const RCP<const Basic>& {
+// Python --> C++
+%typemap(in) RCP<const Basic>& {
     //TODO(iruh): This leaks memory. Not sure when I can delete it though, as
     // it needs to still be valid when the pointer to the RCP gets dereferenced.
     CRCPBasic* rcp_basic = new CRCPBasic;
@@ -48,8 +49,8 @@ using SymEngine::Basic;
     $1 = &rcp_basic->m;
 }
 
-// C --> Python
-%typemap(out) const RCP<const Basic>& {
+// C++ --> Python
+%typemap(out) RCP<const Basic>& {
     // Check how this impacts memory management, same as above.
     CRCPBasic* rcp_basic;
     rcp_basic = (CRCPBasic*)$1;
@@ -61,10 +62,20 @@ using SymEngine::Basic;
     $result = basic;
 }
 
+// The pattern matching is not very smart apparently
+%typemap(in) SymEngine::RCP<const SymEngine::Basic>& = RCP<const Basic>&;
+%typemap(out) SymEngine::RCP<const SymEngine::Basic>& = RCP<const Basic>&;
+
+// Python --> C++
+// TODO(iruh): Get the type maps for unordered sets working (e.g. getSymbols)
+// %typemap(in) std::unordered_set<SWIGTYPE, SWIGTYPE, SWIGTYPE>
+
 %{
 #include "SymbolicObjective.h"
 #include "SymEngineUtilities.h"
+#include "GetSymbolsVisitor.h"
 %}
 
 %include "SymbolicObjective.h"
 %include "SymEngineUtilities.h"
+%include "GetSymbolsVisitor.h"
