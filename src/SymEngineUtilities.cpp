@@ -1,14 +1,20 @@
-#include <SymEngineUtilities.hpp>
+#include "SymEngineUtilities.h"
+
 #include <symengine/basic.h>
+#include <symengine/symbol.h>
+
+#include <SymEngineUtilities.h>
+
+using SymEngine::Basic;
+using SymEngine::RCP;
+using SymEngine::Symbol;
 
 namespace cppmpc {
 
-    namespace Utility {
+namespace Utility {
 
-        const RCP<const Basic>& echo(const RCP<const Basic> &basic) {
-            return basic;
-        }
+const RCP<const Basic>& echo(const RCP<const Basic>& basic) { return basic; }
 
-    } // namespace Utility
+}  // namespace Utility
 
-} // namespace cppmpc
+}  // namespace cppmpc

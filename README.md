@@ -5,6 +5,12 @@
 - [SymEngine](https://github.com/symengine/symengine)
 - [GMP](https://gmplib.org/)
 
+**Dev Dependencies**
+- fd
+- clang-format
+- black
+- cpplint
+
 **Python Wrappers Setup**
 
 Because of reasons, the [symengine.py]() python wrapper for symengine only

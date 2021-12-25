@@ -1,23 +1,23 @@
-#include <iostream>
-#include "SymbolicObjective.hpp"
+#include "SymbolicObjective.h"
 
-#include <symengine/basic.h>
-#include <symengine/symbol.h>
-#include <symengine/number.h>
 #include <symengine/add.h>
+#include <symengine/basic.h>
 #include <symengine/mul.h>
+#include <symengine/number.h>
 #include <symengine/printers.h>
+#include <symengine/symbol.h>
 
-using SymEngine::RCP;
+#include <iostream>
+
 using SymEngine::Basic;
 using SymEngine::mul;
+using SymEngine::RCP;
 using SymEngine::symbol;
 
 namespace cppmpc {
-    
-    SymbolicObjective::SymbolicObjective () {
-        std::cout << "Hello World" << std::endl;
-    }
 
+SymbolicObjective::SymbolicObjective() {
+  std::cout << "Hello World" << std::endl;
+}
 
-} // namespace cppmpc
+}  // namespace cppmpc

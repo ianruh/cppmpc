@@ -62,9 +62,9 @@ using SymEngine::Basic;
 }
 
 %{
-#include "SymbolicObjective.hpp"
-#include "SymEngineUtilities.hpp"
+#include "SymbolicObjective.h"
+#include "SymEngineUtilities.h"
 %}
 
-%include "SymbolicObjective.hpp"
-%include "SymEngineUtilities.hpp"
+%include "SymbolicObjective.h"
+%include "SymEngineUtilities.h"

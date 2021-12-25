@@ -2,8 +2,8 @@ import unittest
 import symengine
 import cppmpc
 
-class BasicSwigWrapperTests(unittest.TestCase):
 
+class BasicSwigWrapperTests(unittest.TestCase):
     def test_echo(self):
         """
         Just test that we can convert to and from RCP<const Basic> without
@@ -13,7 +13,8 @@ class BasicSwigWrapperTests(unittest.TestCase):
         y = symengine.Symbol("y")
 
         self.assertEqual(x, cppmpc.echo(x))
-        self.assertEqual(x*y, cppmpc.echo(x*y))
+        self.assertEqual(x * y, cppmpc.echo(x * y))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
