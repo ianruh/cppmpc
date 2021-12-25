@@ -1,3 +1,4 @@
+// Copyright 2021 Ian Ruh
 #include <iostream>
 
 #include "SymbolicObjective.h"

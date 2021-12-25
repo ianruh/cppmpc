@@ -1,5 +1,6 @@
-#ifndef _GET_SYMBOLS_VISITOR_H
-#define _GET_SYMBOLS_VISITOR_H
+// Copyright 2021 Ian Ruh
+#ifndef INCLUDE_GETSYMBOLSVISITOR_H_
+#define INCLUDE_GETSYMBOLSVISITOR_H_
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
@@ -27,13 +28,13 @@ class GetSymbolsVisitor : public SymEngine::BaseVisitor<GetSymbolsVisitor> {
   UnorderedSetSymbol symbols;
 
  public:
-  GetSymbolsVisitor(){};
+  GetSymbolsVisitor() {}
   void bvisit(const Symbol &x);
-  void bvisit(const Basic &){};
+  void bvisit(const Basic &) {}
 
   UnorderedSetSymbol apply(const Basic &b);
 };
 
 }  // namespace cppmpc
 
-#endif  // _GET_SYMBOLS_VISITOR_H
+#endif  // INCLUDE_GETSYMBOLSVISITOR_H_

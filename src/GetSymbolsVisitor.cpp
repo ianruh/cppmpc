@@ -1,3 +1,4 @@
+// Copyright 2021 Ian Ruh
 #include "GetSymbolsVisitor.h"
 
 #include <symengine/basic.h>

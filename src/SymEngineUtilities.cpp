@@ -1,9 +1,8 @@
+// Copyright 2021 Ian Ruh
 #include "SymEngineUtilities.h"
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
-
-#include <SymEngineUtilities.h>
 
 using SymEngine::Basic;
 using SymEngine::RCP;

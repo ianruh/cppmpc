@@ -9,6 +9,7 @@ sub_help(){
     echo "    build        Build the library"
     echo "    clean        Clean all build artifacts"
     echo "    cpplint      Lint all of the c++ code using cpplint"
+    echo "    copyright    Place the copyright at the top of all source files"
     echo "    format       Format all code using flake8 and clang-format"
     echo "    format-cpp   Format c/c++ code using clang-format"
     echo "    format-py    Format python code using flake8"
@@ -16,6 +17,21 @@ sub_help(){
     echo "For help with each subcommand run:"
     echo "$ProgName <subcommand> -h|--help"
     echo ""
+}
+
+sub_copyright() {
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
+    for i in $(fd ".*\.($CPP_EXTENSIONS)" ./src/ ./include/ ./tests/); do
+        if ! grep -q Copyright "$i"; then
+            cat ./copyright.txt "$i" > "$i.new"
+            mv "$i.new" "$i"
+        fi
+    done
+
+    cd "$original_wd"
 }
 
 sub_cpplint() { 

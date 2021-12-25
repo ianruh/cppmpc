@@ -1,5 +1,6 @@
-#ifndef _SYMBOLIC_OBJECTIVE_H
-#define _SYMBOLIC_OBJECTIVE_H
+// Copyright 2021 Ian Ruh
+#ifndef INCLUDE_SYMBOLICOBJECTIVE_H_
+#define INCLUDE_SYMBOLICOBJECTIVE_H_
 
 #include <symengine/basic.h>
 
@@ -16,4 +17,4 @@ class SymbolicObjective {
 
 }  // namespace cppmpc
 
-#endif  // _SYMBOLIC_OBJECTIVE_H
+#endif  // INCLUDE_SYMBOLICOBJECTIVE_H_

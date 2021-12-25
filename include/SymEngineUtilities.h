@@ -1,5 +1,6 @@
-#ifndef _SYMENGINE_UTILITIES_H
-#define _SYMENGINE_UTILITIES_H
+// Copyright 2021 Ian Ruh
+#ifndef INCLUDE_SYMENGINEUTILITIES_H_
+#define INCLUDE_SYMENGINEUTILITIES_H_
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
@@ -22,4 +23,4 @@ const RCP<const Basic>& echo(const RCP<const Basic>& basic);
 
 bool operator<(const RCP<const Symbol> a, const RCP<const Symbol> b);
 
-#endif  // _SYMBOLIC_OBJECTIVE_H
+#endif  // INCLUDE_SYMENGINEUTILITIES_H_
