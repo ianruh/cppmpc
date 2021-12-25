@@ -18,7 +18,7 @@ using SymEngine::symbol;
 namespace cppmpc {
 
 SymbolicObjective::SymbolicObjective() {
-  std::cout << "Hello World" << std::endl;
+    std::cout << "Hello World" << std::endl;
 }
 
 }  // namespace cppmpc

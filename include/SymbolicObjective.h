@@ -10,9 +10,9 @@ using SymEngine::RCP;
 namespace cppmpc {
 
 class SymbolicObjective {
-  // Constructors
+    // Constructors
  public:
-  SymbolicObjective();
+    SymbolicObjective();
 };
 
 }  // namespace cppmpc

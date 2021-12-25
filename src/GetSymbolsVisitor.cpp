@@ -14,11 +14,11 @@ using SymEngine::Symbol;
 namespace cppmpc {
 
 void GetSymbolsVisitor::bvisit(const Symbol &x) {
-  this->symbols.insert(make_rcp<const Symbol>(x.get_name()));
+    this->symbols.insert(make_rcp<const Symbol>(x.get_name()));
 }
 
 UnorderedSetSymbol GetSymbolsVisitor::apply(const Basic &b) {
-  b.accept(*this);
-  return this->symbols;
+    b.accept(*this);
+    return this->symbols;
 }
 }  // namespace cppmpc
