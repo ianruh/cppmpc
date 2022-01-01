@@ -22,7 +22,7 @@ add_compile_options(-fPIC)
 ######## SymEngine ########
 # TODO(ianruh): Make this optional so solvers can be built without needing
 # symengine installed.
-FIND_PACKAGE(SymEngine REQUIRED)
+FIND_PACKAGE(SymEngine REQUIRED PATHS third_party/install)
 
 # I don't know why this is needed. Shouldn't gmp be linked when SymEngine
 # builds since it is building static libs?

@@ -2,7 +2,9 @@
 
 ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
-  
+SYMENGINE_REPO='https://github.com/symengine/symengine.git'
+SYMENGINEPY_REPO='https://github.com/symengine/symengine.py.git'
+
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
     echo "Subcommands:"
@@ -29,6 +31,78 @@ sub_help(){
 util_section_header() {
     echo ""
     echo "############### $1 ################"
+}
+
+# Bootstrap the repository
+#
+# Args: None
+sub_bootstrap() { 
+    # Then do testing stuffs
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+    REPO_ROOT=$(pwd)
+
+    util_section_header "Setting up python virtual environment"
+
+    if ! [ -d ./venv/ ]; then
+        python3 -m venv venv
+    fi
+    source venv/bin/activate
+    python3 -m pip install flake8 cpplint pytest Cython
+
+    util_section_header "Setting up SymEngine & SymEngine.py"
+ 
+    if [ -d ./third_party/ ]; then
+        rm -rf third_party/
+    else
+        mkdir ./third_party/
+        mkdir ./third_party/install 
+    fi
+
+    cd  ./third_party/
+
+    git clone $SYMENGINE_REPO symengine
+    git clone $SYMENGINEPY_REPO symengine.py
+
+    # Checkout the supported commit for symengine
+    SYMENGINEPY_SUPPORTED_COMMIT=$(cat symengine.py/symengine_version.txt)
+    cd symengine/ && git checkout $SYMENGINEPY_SUPPORTED_COMMIT && cd ../
+
+    # Build SymEnginne
+    cd symengine/
+    mkdir build
+    cd build/
+    cmake -DCMAKE_INSTALL_PREFIX=$REPO_ROOT/third_party/install ..
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        return 1;
+    fi
+    make -j8
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        return 1;
+    fi
+    make install
+    cd ../../
+
+    # Install the python wrappers
+    cd symengine.py/
+    python3 setup.py install build_ext \
+        --symengine-dir="$REPO_ROOT/third_party/install"
+
+    util_section_header "Building CPPMPC and setting up wrapper"
+    cd $REPO_ROOT
+    sub_build
+
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        return 1;
+    fi
+
+    cd cppmpc_py
+    python3 -m pip install -e .
+
+    cd "$original_wd"
 }
 
 # Run all of the python and C++ tests.
@@ -230,6 +304,8 @@ sub_clean-all() {
     rm -f ./cppmpc_py/_cppmpc_swig.so
     rm -f ./cppmpc_py/cppmpc.py
     rm -f ./cppmpc_py/cppmpcPYTHON_wrap.cxx
+    rm -rf third_party/
+    rm -rf venv/
 
     cd "$original_wd"
 }
