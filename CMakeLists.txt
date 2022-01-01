@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 project(cppmpc)
 
 # GoogleTest requires at least C++11
-set(CMAKE_CXX_STANDARD 17)
+# Apparenlt unordered map didn't have contains until 20, so we need 20.
+set(CMAKE_CXX_STANDARD 20)
 
 # Enable Compiler warnings
 if(MSVC)
@@ -45,6 +46,9 @@ INCLUDE(${SWIG_USE_FILE})
 FIND_PACKAGE(PythonLibs)
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
+####### Eigen #######
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
 ################################# Targets #####################################
 
 ######## Libraries ########
@@ -54,16 +58,18 @@ add_library(cppmpc
     src/SymbolicObjective.cpp
     src/SymEngineUtilities.cpp
     src/GetSymbolsVisitor.cpp
+    src/SymbolicEquality.cpp
     include/SymbolicObjective.h
     include/SymEngineUtilities.h
     include/GetSymbolsVisitor.h
+    include/SymbolicEquality.h
+    include/OrderedSet.h
 )
 target_include_directories(cppmpc PUBLIC include/)
-target_link_libraries(cppmpc symengine gmp)
-
+target_link_libraries(cppmpc symengine gmp Eigen3::Eigen)
 
 ######## SWIG ########
-SET(CMAKE_SWIG_FLAGS "-c++")
+SET(CMAKE_SWIG_FLAGS "-v")
 SET(CMAKE_SWIG_OUTDIR ../cppmpc_py)
 
 SET_SOURCE_FILES_PROPERTIES(swig/cppmpc.i PROPERTIES
@@ -97,7 +103,8 @@ enable_testing()
 
 add_executable(SymbolicTests
     tests/SymbolicObjectiveTest.cpp
-    tests/GetSymbolsVisitorTest.cpp)
+    tests/GetSymbolsVisitorTest.cpp
+    tests/OrderedSetTest.cpp)
 target_link_libraries(SymbolicTests cppmpc gtest_main symengine)
 
 include(GoogleTest)

@@ -24,11 +24,7 @@ RCP<const Symbol> variable(const std::string& name);
 // Create a symbol with th `$p_` prefix indicating it is not an active variable
 RCP<const Symbol> parameter(const std::string& name);
 
-namespace Utility {
-
-// This is a utility just used to test that the swig wrappers can convert to
-// and from RCP<const Basic>.
-const RCP<const Basic>& echo(const RCP<const Basic>& basic);
+UnorderedSetSymbol getSymbols(const RCP<const Basic>& basic);
 
 // Get the variables in a given basic. All variables are just symbols whose
 // names begin with `$v_`.
@@ -42,7 +38,9 @@ UnorderedSetSymbol getVariables(const RCP<const Basic>& basic);
 // For example, a parameter named `i`, is a symbol with name `$p_i`.
 UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
 
-}  // namespace Utility
+// This is a utility just used to test that the swig wrappers can convert to
+// and from RCP<const Basic>.
+const RCP<const Basic>& echo(const RCP<const Basic>& basic);
 
 }  // namespace cppmpc
 

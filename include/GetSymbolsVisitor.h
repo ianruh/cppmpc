@@ -25,8 +25,6 @@ class GetSymbolsVisitor : public SymEngine::BaseVisitor<GetSymbolsVisitor> {
     UnorderedSetSymbol apply(const SymEngine::Basic &b);
 };
 
-UnorderedSetSymbol getSymbols(const RCP<const Basic> &basic);
-
 }  // namespace cppmpc
 
 #endif  // INCLUDE_GETSYMBOLSVISITOR_H_

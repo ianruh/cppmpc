@@ -23,9 +23,10 @@ RCP<const Symbol> parameter(const std::string& name) {
     return SymEngine::symbol("$p_" + name);
 }
 
-namespace Utility {
-
-const RCP<const Basic>& echo(const RCP<const Basic>& basic) { return basic; }
+UnorderedSetSymbol getSymbols(const RCP<const Basic>& basic) {
+    GetSymbolsVisitor visitor;
+    return visitor.apply(*basic.get());
+}
 
 UnorderedSetSymbol getVariables(const RCP<const Basic>& basic) {
     UnorderedSetSymbol allSymbols = getSymbols(basic);
@@ -51,6 +52,6 @@ UnorderedSetSymbol getParameters(const RCP<const Basic>& basic) {
     return parameters;
 }
 
-}  // namespace Utility
+const RCP<const Basic>& echo(const RCP<const Basic>& basic) { return basic; }
 
 }  // namespace cppmpc
