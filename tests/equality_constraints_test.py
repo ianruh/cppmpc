@@ -1,7 +1,6 @@
 import unittest
 import symengine
 import cppmpc
-from sympy import Rational
 
 def to_sympy(arg):
     return arg._sympy_()
@@ -27,11 +26,11 @@ class EqualityConstraintsTests(unittest.TestCase):
         system = constraints.convertToLinearSystem(ordering)
 
         expected_mat = symengine.DenseMatrix(row=2, col=3, v=[
-            0, 3, -1, Rational(1/2), 0, 0
+            0, 3, -1, symengine.Rational(1,2), 0, 0
         ])
 
         expected_const = symengine.DenseMatrix(row=2, col=1, v=[
-            -4, 7 + Rational(-1/2)*a
+            -4, 7 + symengine.Rational(-1,2)*a
         ])
 
 

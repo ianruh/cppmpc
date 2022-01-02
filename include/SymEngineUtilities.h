@@ -4,6 +4,7 @@
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
+#include <symengine/matrix.h>
 
 #include <string>
 #include <unordered_set>
@@ -17,6 +18,8 @@ using SymEngine::Symbol;
 typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
                            SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
         UnorderedSetSymbol;
+
+typedef std::map<RCP<const Basic>, std::string, SymEngine::RCPBasicKeyLess> MapBasicString;
 
 // Create a symbol with the `$v_` prefix indicating it is an active variable
 RCP<const Symbol> variable(const std::string& name);
@@ -41,6 +44,10 @@ UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
 // This is a utility just used to test that the swig wrappers can convert to
 // and from RCP<const Basic>.
 const RCP<const Basic>& echo(const RCP<const Basic>& basic);
+
+std::string generateCCode(const SymEngine::DenseMatrix& mat,
+            const MapBasicString& variableRepr,
+            const MapBasicString& parameterRepr);
 
 }  // namespace cppmpc
 

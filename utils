@@ -5,6 +5,7 @@ CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
 SYMENGINE_REPO='https://github.com/symengine/symengine.git'
 SYMENGINEPY_REPO='https://github.com/ianruh/symengine.py.git'
 SYMENGINEPY_BRANCH='matrix-capsule'
+CLING_URL='https://root.cern/download/cling/cling_2020-11-05_ROOT-ubuntu2004.tar.bz2'
 
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
@@ -43,6 +44,7 @@ sub_bootstrap() {
     cd "$(git rev-parse --show-toplevel)"
     REPO_ROOT=$(pwd)
 
+    #===================== venv =================
     util_section_header "Setting up python virtual environment"
 
     if ! [ -d ./venv/ ]; then
@@ -52,24 +54,31 @@ sub_bootstrap() {
     python3 -m pip install flake8 cpplint pytest Cython ipykernel
     python3 -m ipykernel install --user --name=cppmpc
 
+    #===================== SymEngine =================
     util_section_header "Setting up SymEngine & SymEngine.py"
  
     if [ -d ./third_party/ ]; then
-        #TODO(ianruh): Should really just pull and rebuild, not start from
-        # scratch
-        rm -rf third_party/
+        cd  ./third_party/
+        cd ./symengine.py/ && \
+            git fetch && \
+            git checkout $SYMENGINEPY_BRANCH && \
+            cd ../
+        cd ./symengine && \
+            git fetch && \
+            cd ../
     else
         mkdir ./third_party/
         mkdir ./third_party/install 
+        
+        cd  ./third_party/
+
+        git clone $SYMENGINE_REPO symengine
+        git clone $SYMENGINEPY_REPO symengine.py
+        cd ./symengine.py/ && \
+            git fetch && \
+            git checkout $SYMENGINEPY_BRANCH && \
+            cd ../
     fi
-
-    cd  ./third_party/
-
-    git clone $SYMENGINE_REPO symengine
-    git clone $SYMENGINEPY_REPO symengine.py
-    cd ./symengine.py/
-    git fetch && git checkout $SYMENGINEPY_BRANCH
-    cd ../
 
     # Checkout the supported commit for symengine
     SYMENGINEPY_SUPPORTED_COMMIT=$(cat symengine.py/symengine_version.txt)
@@ -77,7 +86,9 @@ sub_bootstrap() {
 
     # Build SymEnginne
     cd symengine/
-    mkdir build
+    if ! [ -d build ]; then
+        mkdir build
+    fi
     cd build/
     cmake -DCMAKE_INSTALL_PREFIX=$REPO_ROOT/third_party/install ..
     # Stop if the build failed
@@ -97,6 +108,15 @@ sub_bootstrap() {
     python3 setup.py install build_ext \
         --symengine-dir="$REPO_ROOT/third_party/install"
 
+    #===================== Cling =================
+    util_section_header "Downloading CLING"
+    cd $REPO_ROOT
+    cd third_party/
+    wget -O cling.tar.bz2 $CLING_URL
+    echo "Extracting cling..."
+    bunzip2 cling.tar.bz2
+
+    #===================== CPPMPC =================
     util_section_header "Building CPPMPC and setting up wrapper"
     cd $REPO_ROOT
     sub_build

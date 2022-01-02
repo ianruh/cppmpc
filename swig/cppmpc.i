@@ -141,13 +141,11 @@ CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Symbol>,SymEngineSymbol);
 %include "SymEngineUtilities.h"
 %include "GetSymbolsVisitor.h"
 %include "OrderedSet.h"
-
 %include "SymbolicEquality.h"
+
 //==========================================================================
 
 %ignore SymbolicEqualityConstraints::convertToLinearSystem(const OrderedSet&) const;
-
-
 %extend SymbolicEqualityConstraints
 {    
     std::pair<SymEngine::DenseMatrix, SymEngine::DenseMatrix>
@@ -157,6 +155,8 @@ CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Symbol>,SymEngineSymbol);
     }
 }
 
+//==========================================================================
+
 %{
 typedef struct DenseMatrixStruct {
     SymEngine::DenseMatrix m;
@@ -165,6 +165,7 @@ typedef struct DenseMatrixStruct {
     DenseMatrixStruct(SymEngine::DenseMatrix& other): m(other) {}
 } DenseMatrixStruct;
 %}
+// C++ --> Python
 %typemap(out) SymEngine::DenseMatrix {
     // Check how this impacts memory management, same as above.
     DenseMatrixStruct* dense_mat = new DenseMatrixStruct($1);
@@ -174,6 +175,18 @@ typedef struct DenseMatrixStruct {
     PyObject* basic = PyObject_CallObject(capsule_to_dmatrix_func, args);
 
     $result = basic;
+}
+// Python --> C++
+%typemap(in) SymEngine::DenseMatrix {
+    //TODO(iruh): This leaks memory. Not sure when I can delete it though, as
+    // it needs to still be valid when the pointer to the RCP gets dereferenced.
+    DenseMatrixStruct dense_mat;
+    PyObject* capsule = PyCapsule_New(&dense_mat, NULL, NULL);
+    PyObject* args = PyTuple_Pack(2, capsule, $input);
+
+    PyObject* call_result = PyObject_CallObject(dmatrix_assign_to_capsule_func, args);
+
+    $1 = dense_mat.m;
 }
 
 %template(DenseMatrixPair) std::pair<SymEngine::DenseMatrix,SymEngine::DenseMatrix>;
