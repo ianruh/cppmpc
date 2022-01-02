@@ -2,11 +2,12 @@
 
 %include "stl.i"
 %include "std_string.i"
-%include "std_pair.i"
+%include "std/std_pair.i"
 
 %{
 #include "Python.h"
 #include "symengine/basic.h"
+#include "symengine/matrix.h"
 #include "stdio.h"
 
 
@@ -19,6 +20,7 @@
 using SymEngine::RCP;
 using SymEngine::Basic;
 using SymEngine::Symbol;
+using SymEngine::DenseMatrix;
 
 using cppmpc::OrderedSet;
 
@@ -31,7 +33,12 @@ PyObject* assign_to_capsule_func = PyObject_GetAttrString(
 PyObject* capsule_to_basic_func = PyObject_GetAttrString(
     wrapper_module,
     (char*)"capsule_to_basic");
-
+PyObject* dmatrix_assign_to_capsule_func = PyObject_GetAttrString(
+    wrapper_module,
+    (char*)"dmatrix_assign_to_capsule");
+PyObject* capsule_to_dmatrix_func = PyObject_GetAttrString(
+    wrapper_module,
+    (char*)"capsule_to_dmatrix");
 %}
 
 // Macro to construct struct names
@@ -120,6 +127,9 @@ CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Basic>,SymEngineBasic);
 CONVERSION_HELPER(RCP<const Symbol>,Symbol);
 CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Symbol>,SymEngineSymbol);
 
+//CONVERSION_HELPER(DenseMatrix,DenseMatrixStruct);
+//CONVERSION_HELPER(SymEngine::DenseMatrix,SymEngineDenseMatrixStruct);
+
 //%typemap(in) cppmpc::OrderedSet = OrderedSet;
 //%typemap(in) cppmpc::OrderedSet & = OrderedSet;
 //%typemap(in) OrderedSet const & = OrderedSet;
@@ -132,11 +142,11 @@ CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Symbol>,SymEngineSymbol);
 %include "GetSymbolsVisitor.h"
 %include "OrderedSet.h"
 
+%include "SymbolicEquality.h"
 //==========================================================================
 
 %ignore SymbolicEqualityConstraints::convertToLinearSystem(const OrderedSet&) const;
 
-%include "SymbolicEquality.h"
 
 %extend SymbolicEqualityConstraints
 {    
@@ -147,4 +157,24 @@ CONVERSION_HELPER(SymEngine::RCP<const SymEngine::Symbol>,SymEngineSymbol);
     }
 }
 
+%{
+typedef struct DenseMatrixStruct {
+    SymEngine::DenseMatrix m;
+
+    DenseMatrixStruct() = default;
+    DenseMatrixStruct(SymEngine::DenseMatrix& other): m(other) {}
+} DenseMatrixStruct;
+%}
+%typemap(out) SymEngine::DenseMatrix {
+    // Check how this impacts memory management, same as above.
+    DenseMatrixStruct* dense_mat = new DenseMatrixStruct($1);
+    PyObject* capsule = PyCapsule_New(dense_mat, NULL, NULL);
+    PyObject* args = PyTuple_Pack(1, capsule);
+
+    PyObject* basic = PyObject_CallObject(capsule_to_dmatrix_func, args);
+
+    $result = basic;
+}
+
+%template(DenseMatrixPair) std::pair<SymEngine::DenseMatrix,SymEngine::DenseMatrix>;
 //==========================================================================

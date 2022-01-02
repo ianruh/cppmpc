@@ -4,3 +4,4 @@ __pycache__/
 *$py.class
 venv/
 third_party/
+.ipynb_checkpoints/
