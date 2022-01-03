@@ -114,8 +114,8 @@ SymbolicEqualityConstraints::convertToLinearSystem(
         RCP<const Basic> constraint = equality;
         if (SymEngine::is_a<SymEngine::Equality>(*equality)) {
             constraint = SymEngine::sub(
-                    down_cast<const SymEngine::Equality&>(*equality).get_arg2(),
-                    down_cast<const SymEngine::Equality&>(*equality)
+                    SymEngine::down_cast<const SymEngine::Equality&>(*equality).get_arg2(),
+                    SymEngine::down_cast<const SymEngine::Equality&>(*equality)
                             .get_arg1());
         }
 

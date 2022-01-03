@@ -4,6 +4,7 @@
 
 #include <symengine/basic.h>
 #include <symengine/matrix.h>
+#include <symengine/expression.h>
 
 #include <utility>
 #include <vector>
@@ -17,6 +18,7 @@ namespace cppmpc {
 
 using SymEngine::Basic;
 using SymEngine::RCP;
+using SymEngine::Expression;
 
 class SymbolicEqualityConstraints {
  private:
@@ -36,12 +38,40 @@ class SymbolicEqualityConstraints {
      */
     void appendConstraint(const RCP<const Basic>& b);
 
+    /**
+     * @brief Append an equality constraint.
+     *
+     * @param left The left side of the equality.
+     * @param right The right side of the equality.
+     */
+    void appendConstraint(const Expression& left, const Expression& right);
+
     void removeConstraint(size_t index);
 
     const RCP<const Basic>& getConstraint(size_t index) const;
 
+    /**
+     * @brief Insert an equality constraint at the given index. If the node
+     * is not an equality node, then the node is assumed to be equal to 0.
+     *
+     * @param index The index to insert at.
+     * @param b The node to insert.
+     */
     void insertConstraint(size_t index, const RCP<const Basic>& b);
+    
+    /**
+     * @brief Convenience function to insert an equality constraint based off
+     * of two expressions.
+     *
+     * @param index The index to insert at.
+     * @param left Expression for the left side of the equality constraint.
+     * @param right Expression for the right side of the equality constraint.
+     */
+    void insertConstraint(size_t index, const Expression& left, const Expression& right);
 
+    /**
+     * @brief The number of equality constraints in.
+     */
     size_t numConstraints() const { return this->constraints.size(); }
 
     UnorderedSetSymbol getSymbols() const;

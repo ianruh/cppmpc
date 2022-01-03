@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(cppmpc)
 
 # GoogleTest requires at least C++11
-# Apparenlt unordered map didn't have contains until 20, so we need 20.
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 # Enable Compiler warnings
 if(MSVC)

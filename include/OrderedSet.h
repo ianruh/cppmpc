@@ -4,11 +4,13 @@
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
+#include <symengine/expression.h>
 
 #include <unordered_map>
 #include <vector>
 
 using SymEngine::RCP;
+using SymEngine::Basic;
 using SymEngine::Symbol;
 
 namespace cppmpc {
@@ -26,10 +28,29 @@ class OrderedSet {
     // TODO(ianruh): Copy constructor
     // TODO(ianruh): Move constructor
 
+    /**
+     * @brief Append a symbol to the ordered set.
+     *
+     * @param el The symbol to append.
+     */
     void append(RCP<const Symbol> el) { this->insert(this->size(), el); }
 
+    /**
+     * @brief Uses the append for `RCP<const Symbol>`, but makes this nicer to
+     * use with expressions.
+     *
+     * @param exp The symbol to append.
+     */
+    void append(const SymEngine::Expression& exp) { this->insert(this->size(), exp); }
+
+    /**
+     * @brief Insert symbol into the ordered set at the specified index.
+     *
+     * @param index The index to insert the symbol at.
+     * @param el The symbol to insert.
+     */
     void insert(size_t index, RCP<const Symbol> el) {
-        if (this->elements_map.contains(el)) {
+        if (this->elements_map.count(el) > 0) {
             return;
         }
 
@@ -47,6 +68,23 @@ class OrderedSet {
         }
     }
 
+    /**
+     * @brief Convenience function to insert a symbol expression into the
+     * ordered set.
+     *
+     * @param index The index to insert the symbol at.
+     * @param exp The symbol to insert.
+     */
+    void insert(size_t index, const SymEngine::Expression& exp) {
+        RCP<const Basic> basic = exp.get_basic();
+
+        if(SymEngine::is_a<SymEngine::Symbol>(*basic)) {
+            this->insert(index, SymEngine::rcp_dynamic_cast<const SymEngine::Symbol>(basic));
+        } else {
+            throw std::runtime_error("Only symbols can be in ordered set.");
+        }
+    }
+
     // We need to remove the element from the vector, and then
     // update the indexes of every element after in the map.
     void remove(size_t index) {
@@ -57,20 +95,32 @@ class OrderedSet {
         }
     }
 
+    /**
+     * @brief Get the symbol at the given index.
+     */
     RCP<const Symbol> at(size_t index) const {
         return this->elements_vector.at(index);
     }
 
+    /**
+     * @brief The number of symbols in the set.
+     */
     size_t size() const { return this->elements_vector.size(); }
 
+    /**
+     * @brief Whether the set contains the given symbol. Is O(1).
+     *
+     * @param el The element to test.
+     * @return True if in the set, false if not.
+     */
     bool contains(const RCP<const Symbol>& el) const {
-        return this->elements_map.contains(el);
+        return this->elements_map.count(el) > 0;
     }
 
     // Determine if the set other is a subset of this.
     bool isSubset(const OrderedSet& other) const {
         for (size_t i = 0; i < other.size(); i++) {
-            if (!this->elements_map.contains(other.at(i))) {
+            if (!(this->elements_map.count(other.at(i)) > 0)) {
                 return false;
             }
         }
