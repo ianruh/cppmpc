@@ -17,6 +17,8 @@ add_compile_options(-Wno-missing-field-initializers)
 # Make SWIG happy (something to do with dynamic linking)
 add_compile_options(-fPIC)
 
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
 ################################# Dependencies ################################
 
 ######## SymEngine ########
@@ -39,13 +41,6 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-######## SWIG ########
-FIND_PACKAGE(SWIG REQUIRED)
-INCLUDE(${SWIG_USE_FILE})
-
-FIND_PACKAGE(PythonLibs)
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-
 ####### Eigen #######
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
@@ -67,31 +62,6 @@ add_library(cppmpc
 )
 target_include_directories(cppmpc PUBLIC include/)
 target_link_libraries(cppmpc symengine gmp Eigen3::Eigen)
-
-######## SWIG ########
-SET(CMAKE_SWIG_FLAGS "-v")
-SET(CMAKE_SWIG_OUTDIR ../cppmpc_py)
-
-SET_SOURCE_FILES_PROPERTIES(swig/cppmpc.i PROPERTIES
-    CPLUSPLUS ON
-)
-SWIG_ADD_LIBRARY(cppmpc_swig
-    LANGUAGE python
-    SOURCES swig/cppmpc.i
-)
-set_property(TARGET cppmpc_swig PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
-swig_link_libraries(cppmpc_swig PRIVATE cppmpc symengine)
-target_compile_options(cppmpc_swig PRIVATE "-Wno-unused-variable" "-Wno-maybe-uninitialized")
-
-# Because this is being loaded by python, you need to set LD_PRELOAD as well:
-# LD_PRELOAD=$(gcc -print-file-name=libasan.so)
-#target_compile_options(cppmpc_swig PRIVATE "-fsanitize=address")
-#target_link_options(cppmpc_swig PRIVATE "-fsanitize=address")
-
-# For some reason setting CMAKE_SWIG_OUTDIR doesn't effect where the shared
-# library gets written, so we change it manually here. The _cppmpc_swig target
-# is what is created by swig when we add the library.
-set_property(TARGET cppmpc_swig PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SWIG_OUTDIR})
 
 ######## Executables ########
 

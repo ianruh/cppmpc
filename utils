@@ -2,10 +2,6 @@
 
 ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
-SYMENGINE_REPO='https://github.com/symengine/symengine.git'
-SYMENGINEPY_REPO='https://github.com/ianruh/symengine.py.git'
-SYMENGINEPY_BRANCH='matrix-capsule'
-CLING_URL='https://root.cern/download/cling/cling_2020-11-05_ROOT-ubuntu2004.tar.bz2'
 
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
@@ -17,7 +13,6 @@ sub_help(){
     echo "    copyright    Place the copyright at the top of all source files"
     echo "    format       Format all code using flake8 and clang-format"
     echo "    format-cpp   Format c/c++ code using clang-format"
-    echo "    format-py    Format python code using flake8"
     echo "    todo         Search todos in the code"
     echo "    test         Run all C++ and python tests"
     echo ""
@@ -35,102 +30,16 @@ util_section_header() {
     echo "############### $1 ################"
 }
 
-# Bootstrap the repository
-#
-# Args: None
-sub_bootstrap() { 
-    # Then do testing stuffs
+
+sub_install-kernel() {
     original_wd=$(pwd)
     cd "$(git rev-parse --show-toplevel)"
-    REPO_ROOT=$(pwd)
 
-    #===================== venv =================
-    util_section_header "Setting up python virtual environment"
-
-    if ! [ -d ./venv/ ]; then
-        python3 -m venv venv
-    fi
-    source venv/bin/activate
-    python3 -m pip install flake8 cpplint pytest Cython ipykernel
-    python3 -m ipykernel install --user --name=cppmpc
-
-    #===================== SymEngine =================
-    util_section_header "Setting up SymEngine & SymEngine.py"
- 
-    if [ -d ./third_party/ ]; then
-        cd  ./third_party/
-        cd ./symengine.py/ && \
-            git fetch && \
-            git checkout $SYMENGINEPY_BRANCH && \
-            cd ../
-        cd ./symengine && \
-            git fetch && \
-            cd ../
-    else
-        mkdir ./third_party/
-        mkdir ./third_party/install 
-        
-        cd  ./third_party/
-
-        git clone $SYMENGINE_REPO symengine
-        git clone $SYMENGINEPY_REPO symengine.py
-        cd ./symengine.py/ && \
-            git fetch && \
-            git checkout $SYMENGINEPY_BRANCH && \
-            cd ../
-    fi
-
-    # Checkout the supported commit for symengine
-    SYMENGINEPY_SUPPORTED_COMMIT=$(cat symengine.py/symengine_version.txt)
-    cd symengine/ && git checkout $SYMENGINEPY_SUPPORTED_COMMIT && cd ../
-
-    # Build SymEnginne
-    cd symengine/
-    if ! [ -d build ]; then
-        mkdir build
-    fi
-    cd build/
-    cmake -DCMAKE_INSTALL_PREFIX=$REPO_ROOT/third_party/install ..
-    # Stop if the build failed
-    if [[ "$?" != "0" ]]; then
-        return 1;
-    fi
-    make -j8
-    # Stop if the build failed
-    if [[ "$?" != "0" ]]; then
-        return 1;
-    fi
-    make install
-    cd ../../
-
-    # Install the python wrappers
-    cd symengine.py/
-    python3 setup.py install build_ext \
-        --symengine-dir="$REPO_ROOT/third_party/install"
-
-    #===================== Cling =================
-    util_section_header "Downloading CLING"
-    cd $REPO_ROOT
-    cd third_party/
-    wget -O cling.tar.bz2 $CLING_URL
-    echo "Extracting cling..."
-    bunzip2 cling.tar.bz2
-
-    #===================== CPPMPC =================
-    util_section_header "Building CPPMPC and setting up wrapper"
-    cd $REPO_ROOT
-    sub_build
-
-    # Stop if the build failed
-    if [[ "$?" != "0" ]]; then
-        return 1;
-    fi
-
-    cd cppmpc_py
-    python3 -m pip install -e .
+    jupyter kernelspec install $CONDA_PREFIX/share/jupyter/kernels/xcpp17 --user
 
     cd "$original_wd"
 }
+
 
 # Run all of the python and C++ tests.
 #
@@ -154,10 +63,6 @@ sub_test() {
     util_section_header "C++ Tests"
     cd ./build/
     ctest
-
-    util_section_header "Python Tests"
-    cd ../
-    pytest
 
     cd "$original_wd"
 }
@@ -275,14 +180,17 @@ sub_build() {
 
     cd "$(git rev-parse --show-toplevel)"
 
-    if [ -d ./build/ ]; then
-        cd ./build/
-    else
+    if ! [ -d ./build/ ]; then
         mkdir ./build/
-        cd ./build/
     fi
+    cd ./build/
 
-    cmake ..
+    cmake \
+        -D CMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -D CMAKE_C_COMPILER=$CC \
+        -D CMAKE_CXX_COMPILER=$CXX \
+        -D CMAKE_INSTALL_LIBDIR=${CONDA_PREFIX}/lib \
+        ..
     
     # Stop if the build failed
     if [[ "$?" != "0" ]]; then
@@ -310,11 +218,6 @@ sub_clean() {
     if [ -f Makefile ]; then
         make clean
     fi
-    cd ../
-
-    rm -f ./cppmpc_py/_cppmpc_swig.so
-    rm -f ./cppmpc_py/cppmpc.py
-    rm -f ./cppmpc_py/cppmpcPYTHON_wrap.cxx
 
     cd "$original_wd"
 }
@@ -328,17 +231,10 @@ sub_clean-all() {
         rm -rf ./build/
     fi
 
-    rm -f ./cppmpc_py/_cppmpc_swig.so
-    rm -f ./cppmpc_py/cppmpc.py
-    rm -f ./cppmpc_py/cppmpcPYTHON_wrap.cxx
-    rm -rf third_party/
-    rm -rf venv/
-
     cd "$original_wd"
 }
 
 sub_format() {
-    sub_format-py
     sub_format-cpp
 }
   
@@ -348,16 +244,6 @@ sub_format-cpp(){
     cd "$(git rev-parse --show-toplevel)"
     fd ".*\.($CPP_EXTENSIONS)" ./include/ ./src/ ./tests/ | \
         xargs clang-format -i
-
-    cd "$original_wd"
-}
-
-sub_format-py(){
-    original_wd=$(pwd)
-
-    cd "$(git rev-parse --show-toplevel)"
-    fd ".*\.(py)" ./tests/ | \
-        xargs black
 
     cd "$original_wd"
 }
