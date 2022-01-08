@@ -37,7 +37,6 @@ TEST(OrderedSetTests, Basics) {
     EXPECT_EQ(2, set.size());
 }
 
-
 TEST(OrderedSetTests, Union) {
     RCP<const Symbol> x = SymEngine::symbol("x");
     RCP<const Symbol> y = SymEngine::symbol("y");

@@ -3,8 +3,8 @@
 #define INCLUDE_SYMBOLICEQUALITY_H_
 
 #include <symengine/basic.h>
-#include <symengine/matrix.h>
 #include <symengine/expression.h>
+#include <symengine/matrix.h>
 
 #include <utility>
 #include <vector>
@@ -17,8 +17,8 @@
 namespace cppmpc {
 
 using SymEngine::Basic;
-using SymEngine::RCP;
 using SymEngine::Expression;
+using SymEngine::RCP;
 
 class SymbolicEqualityConstraints {
  private:
@@ -58,7 +58,7 @@ class SymbolicEqualityConstraints {
      * @param b The node to insert.
      */
     void insertConstraint(size_t index, const RCP<const Basic>& b);
-    
+
     /**
      * @brief Convenience function to insert an equality constraint based off
      * of two expressions.
@@ -67,7 +67,8 @@ class SymbolicEqualityConstraints {
      * @param left Expression for the left side of the equality constraint.
      * @param right Expression for the right side of the equality constraint.
      */
-    void insertConstraint(size_t index, const Expression& left, const Expression& right);
+    void insertConstraint(size_t index, const Expression& left,
+                          const Expression& right);
 
     /**
      * @brief The number of equality constraints in.
@@ -81,7 +82,7 @@ class SymbolicEqualityConstraints {
     UnorderedSetSymbol getParameters() const;
 
     std::pair<SymEngine::DenseMatrix, SymEngine::DenseMatrix>
-        convertToLinearSystem(const OrderedSet& variableOrdering) const;
+    convertToLinearSystem(const OrderedSet& variableOrdering) const;
 };
 
 }  // namespace cppmpc

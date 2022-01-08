@@ -11,8 +11,8 @@
 #include <iostream>
 
 using SymEngine::Basic;
-using SymEngine::mul;
 using SymEngine::RCP;
+using SymEngine::mul;
 using SymEngine::symbol;
 
 namespace cppmpc {

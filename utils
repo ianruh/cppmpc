@@ -35,7 +35,8 @@ sub_install-kernel() {
     original_wd=$(pwd)
     cd "$(git rev-parse --show-toplevel)"
 
-    jupyter kernelspec install $CONDA_PREFIX/share/jupyter/kernels/xcpp17 --user
+    jupyter kernelspec install $CONDA_PREFIX/share/jupyter/kernels/xcpp17 \
+        --user --name=cppmpc-cpp17
 
     cd "$original_wd"
 }

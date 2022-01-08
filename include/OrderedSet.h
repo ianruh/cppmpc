@@ -1,16 +1,16 @@
 // Copyright 2021 Ian Ruh
-#ifndef INCLUDE_ORDERED_SET_H_
-#define INCLUDE_ORDERED_SET_H_
+#ifndef INCLUDE_ORDEREDSET_H_
+#define INCLUDE_ORDEREDSET_H_
 
 #include <symengine/basic.h>
-#include <symengine/symbol.h>
 #include <symengine/expression.h>
+#include <symengine/symbol.h>
 
 #include <unordered_map>
 #include <vector>
 
-using SymEngine::RCP;
 using SymEngine::Basic;
+using SymEngine::RCP;
 using SymEngine::Symbol;
 
 namespace cppmpc {
@@ -41,7 +41,9 @@ class OrderedSet {
      *
      * @param exp The symbol to append.
      */
-    void append(const SymEngine::Expression& exp) { this->insert(this->size(), exp); }
+    void append(const SymEngine::Expression& exp) {
+        this->insert(this->size(), exp);
+    }
 
     /**
      * @brief Insert symbol into the ordered set at the specified index.
@@ -78,8 +80,10 @@ class OrderedSet {
     void insert(size_t index, const SymEngine::Expression& exp) {
         RCP<const Basic> basic = exp.get_basic();
 
-        if(SymEngine::is_a<SymEngine::Symbol>(*basic)) {
-            this->insert(index, SymEngine::rcp_dynamic_cast<const SymEngine::Symbol>(basic));
+        if (SymEngine::is_a<SymEngine::Symbol>(*basic)) {
+            this->insert(index,
+                         SymEngine::rcp_dynamic_cast<const SymEngine::Symbol>(
+                                 basic));
         } else {
             throw std::runtime_error("Only symbols can be in ordered set.");
         }
@@ -152,4 +156,4 @@ class OrderedSet {
 
 }  // namespace cppmpc
 
-#endif  // INCLUDE_ORDERED_SET_H_
+#endif  // INCLUDE_ORDEREDSET_H_

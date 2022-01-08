@@ -3,9 +3,10 @@
 #define INCLUDE_SYMENGINEUTILITIES_H_
 
 #include <symengine/basic.h>
-#include <symengine/symbol.h>
 #include <symengine/matrix.h>
+#include <symengine/symbol.h>
 
+#include <map>
 #include <string>
 #include <unordered_set>
 
@@ -19,7 +20,8 @@ typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
                            SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
         UnorderedSetSymbol;
 
-typedef std::map<RCP<const Basic>, std::string, SymEngine::RCPBasicKeyLess> MapBasicString;
+typedef std::map<RCP<const Basic>, std::string, SymEngine::RCPBasicKeyLess>
+        MapBasicString;
 
 // Create a symbol with the `$v_` prefix indicating it is an active variable
 RCP<const Symbol> variable(const std::string& name);
@@ -45,9 +47,18 @@ UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
 // and from RCP<const Basic>.
 const RCP<const Basic>& echo(const RCP<const Basic>& basic);
 
+/**
+ * @brief Generate C code that constructs an eigen matrix equivalent to the
+ * passed symbolic matrix, using the given strings as representations for the
+ * variables and parameters.
+ *
+ * @param mat The symbolic mat the matrix eigne matrix is based on.
+ * @param variableRepr A map of variables to symbols.
+ * @param parameterRepr A map of parameters to symbols.
+ */
 std::string generateCCode(const SymEngine::DenseMatrix& mat,
-            const MapBasicString& variableRepr,
-            const MapBasicString& parameterRepr);
+                          const MapBasicString& variableRepr,
+                          const MapBasicString& parameterRepr);
 
 }  // namespace cppmpc
 

@@ -2,6 +2,7 @@
 #include "SymbolicEquality.h"
 
 #include <symengine/basic.h>
+#include <symengine/expression.h>
 #include <symengine/matrix.h>
 #include <symengine/polys/basic_conversions.h>
 #include <symengine/sets.h>
@@ -29,6 +30,11 @@ void SymbolicEqualityConstraints::appendConstraint(const RCP<const Basic>& b) {
     this->insertConstraint(this->numConstraints(), b);
 }
 
+void SymbolicEqualityConstraints::appendConstraint(const Expression& left,
+                                                   const Expression& right) {
+    this->insertConstraint(this->numConstraints(), left, right);
+}
+
 void SymbolicEqualityConstraints::removeConstraint(size_t index) {
     this->constraints.erase(this->constraints.begin() + index);
 }
@@ -41,6 +47,13 @@ const RCP<const Basic>& SymbolicEqualityConstraints::getConstraint(
 void SymbolicEqualityConstraints::insertConstraint(size_t index,
                                                    const RCP<const Basic>& b) {
     this->constraints.insert(this->constraints.begin() + index, b);
+}
+
+void SymbolicEqualityConstraints::insertConstraint(size_t index,
+                                                   const Expression& left,
+                                                   const Expression& right) {
+    this->insertConstraint(index,
+                           SymEngine::sub(left.get_basic(), right.get_basic()));
 }
 
 UnorderedSetSymbol SymbolicEqualityConstraints::getSymbols() const {
@@ -114,7 +127,8 @@ SymbolicEqualityConstraints::convertToLinearSystem(
         RCP<const Basic> constraint = equality;
         if (SymEngine::is_a<SymEngine::Equality>(*equality)) {
             constraint = SymEngine::sub(
-                    SymEngine::down_cast<const SymEngine::Equality&>(*equality).get_arg2(),
+                    SymEngine::down_cast<const SymEngine::Equality&>(*equality)
+                            .get_arg2(),
                     SymEngine::down_cast<const SymEngine::Equality&>(*equality)
                             .get_arg1());
         }
@@ -153,7 +167,7 @@ SymbolicEqualityConstraints::convertToLinearSystem(
                     // one, or if this would be the second non-zero term, then
                     // throw an exception because this constraint can't be
                     // linear.
-                    if (p.first[whichvar] != 1 or non_zero == 2) {
+                    if (p.first[whichvar] != 1 || non_zero == 2) {
                         throw std::runtime_error("Expected a linear equation.");
                     }
                 }
