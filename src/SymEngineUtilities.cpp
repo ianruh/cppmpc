@@ -3,6 +3,7 @@
 
 #include <symengine/basic.h>
 #include <symengine/symbol.h>
+#include <symengine/matrix.h>
 
 #include <iostream>
 #include <sstream>
@@ -53,6 +54,14 @@ UnorderedSetSymbol getParameters(const RCP<const Basic>& basic) {
         }
     }
     return parameters;
+}
+
+void expandAll(SymEngine::DenseMatrix& mat) {
+    for(size_t row = 0; row < mat.nrows(); row++) {
+        for(size_t col = 0; col < mat.ncols(); col++) {
+            mat.set(row,col,SymEngine::expand(mat.get(row,col)));
+        }
+    }
 }
 
 const RCP<const Basic>& echo(const RCP<const Basic>& basic) { return basic; }

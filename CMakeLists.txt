@@ -73,7 +73,8 @@ enable_testing()
 add_executable(SymbolicTests
     tests/SymbolicObjectiveTest.cpp
     tests/GetSymbolsVisitorTest.cpp
-    tests/OrderedSetTest.cpp)
+    tests/OrderedSetTest.cpp
+    tests/EqualityConstraintTest.cpp)
 target_link_libraries(SymbolicTests cppmpc gtest_main symengine)
 
 include(GoogleTest)

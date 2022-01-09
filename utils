@@ -1,20 +1,29 @@
 #!/bin/bash
 
+#--- Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+#---
+
 ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
+SYMENGINE_REPO="https://github.com/symengine/symengine.git"
+SYMENGINE_COMMIT="5c47488c5d1df382d36959b0dad14916dd745f54"
 
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
     echo "Subcommands:"
-    echo "    build        Build the library"
-    echo "    clean        Clean all build artifacts"
-    echo "    clean-all    Clean all build artifacts and delete build/"
-    echo "    cpplint      Lint all of the c++ code using cpplint"
-    echo "    copyright    Place the copyright at the top of all source files"
-    echo "    format       Format all code using flake8 and clang-format"
-    echo "    format-cpp   Format c/c++ code using clang-format"
-    echo "    todo         Search todos in the code"
-    echo "    test         Run all C++ and python tests"
+    echo "    build             Build the library"
+    echo "    clean             Clean all build artifacts"
+    echo "    clean-all         Clean all build artifacts and delete build/"
+    echo "    cpplint           Lint all of the c++ code using cpplint"
+    echo "    copyright         Place the copyright at the top of all source files"
+    echo "    format            Format all code using flake8 and clang-format"
+    echo "    format-cpp        Format c/c++ code using clang-format"
+    echo "    todo              Search todos in the code"
+    echo "    test              Run all C++ and python tests"
+    echo "    install-kernel    Install the jupyter kernel"
     echo ""
     echo "For help with each subcommand run:"
     echo "$ProgName <subcommand> -h|--help"
@@ -26,8 +35,68 @@ sub_help(){
 # Args:
 #   $1: Section name
 util_section_header() {
-    echo ""
-    echo "############### $1 ################"
+    printf "############### $1 ################\n"
+}
+
+util_check_conda() {
+    if [[ -z "$CONDA_PREFIX" ]]; then
+        printf "${RED}\$CONDA_PREFIX environment variable not set. Do you need to activate the environment?${NC}\n"
+        exit 1
+    fi
+}
+
+sub_bootstrap() {
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
+    util_section_header "Building and Installing SymEngine"
+    printf "Using install prefix $CONDA_PREFIX\n"
+
+    # Make a third party directory is one doesn't exist
+    if ! [[ -d third_party/ ]]; then
+        mkdir third_party/
+    fi
+
+    cd third_party/
+
+    # Clone symengine if not already cloned
+    if ! [[ -d symengine ]]; then
+        git clone "$SYMENGINE_REPO" symengine
+    else
+        # Just fetch origin if already cloned
+        cd symengine
+        git fetch origin
+        cd ../
+    fi
+
+    cd symengine
+
+    # Checkout our required commit
+    git checkout "$SYMENGINE_COMMIT"
+
+    # Make a build dir if there isn't already one
+    if ! [[ -d build/ ]]; then
+        mkdir build
+    fi
+
+    cd build/
+
+    # Run cmake with our given prefixes
+    cmake \
+        -D CMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -D CMAKE_C_COMPILER=$CC \
+        -D CMAKE_CXX_COMPILER=$CXX \
+        -D CMAKE_INSTALL_LIBDIR=${CONDA_PREFIX}/lib \
+        -DBUILD_TESTS=OFF \
+        -DBUILD_BENCHMARKS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        ..
+
+    make -j8
+    make install
+
+    cd "$original_wd"
 }
 
 
@@ -35,6 +104,7 @@ sub_install-kernel() {
     original_wd=$(pwd)
     cd "$(git rev-parse --show-toplevel)"
 
+    util_check_conda
     jupyter kernelspec install $CONDA_PREFIX/share/jupyter/kernels/xcpp17 \
         --user --name=cppmpc-cpp17
 
@@ -47,6 +117,7 @@ sub_install-kernel() {
 # Args: None
 sub_test() {
     
+    util_check_conda
     util_section_header "Building"
     # Build first
     sub_build
@@ -178,8 +249,9 @@ sub_cpplint() {
 
 sub_build() { 
     original_wd=$(pwd)
-
     cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
 
     if ! [ -d ./build/ ]; then
         mkdir ./build/
@@ -215,9 +287,11 @@ sub_clean() {
 
     cd "$(git rev-parse --show-toplevel)"
 
-    cd ./build/
-    if [ -f Makefile ]; then
-        make clean
+    if [[ -d build/ ]]; then
+        cd ./build/
+        if [ -f Makefile ]; then
+            make clean
+        fi
     fi
 
     cd "$original_wd"
@@ -230,6 +304,10 @@ sub_clean-all() {
 
     if [ -d ./build/ ]; then
         rm -rf ./build/
+    fi
+
+    if [ -d third_party ]; then
+        rm -rf third_party/ 
     fi
 
     cd "$original_wd"

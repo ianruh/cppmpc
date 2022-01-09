@@ -48,6 +48,13 @@ UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
 const RCP<const Basic>& echo(const RCP<const Basic>& basic);
 
 /**
+ * @brief Expand all elements in the given matrix
+ *
+ * @param mat The matrix to expand all elememnts in.
+ */
+void expandAll(SymEngine::DenseMatrix& mat);
+
+/**
  * @brief Generate C code that constructs an eigen matrix equivalent to the
  * passed symbolic matrix, using the given strings as representations for the
  * variables and parameters.

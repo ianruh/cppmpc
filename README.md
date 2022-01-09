@@ -1,8 +1,7 @@
 # CPP MPC
 
 **Setup**
-`mamba create -n cppmpc -c conda-forge cmake xeus-cling cling=0.8 eigen`
-`conda install symenginne -c conda-forge`
+`mamba create -n cppmpc -c conda-forge cmake xeus-cling cling=0.8 eigen gmp gcc_linux-64`
 
 **Dev Dependencies**
 - fd
