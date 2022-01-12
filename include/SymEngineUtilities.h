@@ -36,12 +36,14 @@ UnorderedSetSymbol getSymbols(const RCP<const Basic>& basic);
 //
 // For example, a variable named `x`, is a symbol with name `$v_x`.
 UnorderedSetSymbol getVariables(const RCP<const Basic>& basic);
+UnorderedSetSymbol getVariables(const SymEngine::DenseMatrix& mat);
 
 // Get the parameters in a given basic. All parameters are just symbols whose
 // names begin with `$p_`.
 //
 // For example, a parameter named `i`, is a symbol with name `$p_i`.
 UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
+UnorderedSetSymbol getParameters(const SymEngine::DenseMatrix& mat);
 
 // This is a utility just used to test that the swig wrappers can convert to
 // and from RCP<const Basic>.
@@ -62,10 +64,12 @@ void expandAll(SymEngine::DenseMatrix& mat);
  * @param mat The symbolic mat the matrix eigne matrix is based on.
  * @param variableRepr A map of variables to symbols.
  * @param parameterRepr A map of parameters to symbols.
+ * @param matrixName The name of the matrix variable in the generated code.
  */
 std::string generateCCode(const SymEngine::DenseMatrix& mat,
                           const MapBasicString& variableRepr,
-                          const MapBasicString& parameterRepr);
+                          const MapBasicString& parameterRepr,
+                          const std::string& matrixName);
 
 }  // namespace cppmpc
 

@@ -43,6 +43,9 @@ FetchContent_MakeAvailable(googletest)
 ####### Eigen #######
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
+####### Cling #######
+#find_package (Cling REQUIRED NO_MODULE)
+
 ################################# Targets #####################################
 
 ######## Libraries ########
@@ -53,11 +56,13 @@ add_library(cppmpc
     src/SymEngineUtilities.cpp
     src/GetSymbolsVisitor.cpp
     src/SymbolicEquality.cpp
+    src/FastMPC.cpp
     include/SymbolicObjective.h
     include/SymEngineUtilities.h
     include/GetSymbolsVisitor.h
     include/SymbolicEquality.h
     include/OrderedSet.h
+    include/FastMPC.h
 )
 target_include_directories(cppmpc PUBLIC include/)
 target_link_libraries(cppmpc symengine gmp Eigen3::Eigen)

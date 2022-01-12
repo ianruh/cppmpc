@@ -10,6 +10,8 @@ ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
 SYMENGINE_REPO="https://github.com/symengine/symengine.git"
 SYMENGINE_COMMIT="5c47488c5d1df382d36959b0dad14916dd745f54"
+CC=clang
+CXX=clang++
 
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
@@ -24,6 +26,7 @@ sub_help(){
     echo "    todo              Search todos in the code"
     echo "    test              Run all C++ and python tests"
     echo "    install-kernel    Install the jupyter kernel"
+    echo "    bootstrap         Build the dependencies that need to be built from source"
     echo ""
     echo "For help with each subcommand run:"
     echo "$ProgName <subcommand> -h|--help"

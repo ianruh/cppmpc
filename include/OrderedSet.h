@@ -19,6 +19,8 @@ class OrderedSet {
  private:
     // Contains the actual elmenets
     std::vector<RCP<const Symbol>> elements_vector;
+
+    // A map from symbol to the index in the vector.
     std::unordered_map<RCP<const Symbol>, size_t, SymEngine::RCPBasicHash,
                        SymEngine::RCPBasicKeyEq>
             elements_map;
@@ -119,6 +121,10 @@ class OrderedSet {
      */
     bool contains(const RCP<const Symbol>& el) const {
         return this->elements_map.count(el) > 0;
+    }
+
+    size_t indexOf(const RCP<const Symbol>& el) const {
+        return this->elements_map.at(el);
     }
 
     // Determine if the set other is a subset of this.

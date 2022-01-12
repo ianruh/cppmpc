@@ -8,7 +8,9 @@
 #include <symengine/sets.h>
 #include <symengine/subs.h>
 
+#include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 #include "OrderedSet.h"
@@ -186,6 +188,60 @@ SymbolicEqualityConstraints::convertToLinearSystem(
         row += 1;
     }
     return std::make_pair(constraintsMatrix, constantsVector);
+}
+
+std::string SymbolicEqualityConstraints::generateMatrixFunctionString(
+        const OrderedSet& variableOrdering, const OrderedSet& parameterOrdering,
+        const std::string& functionName) const {
+    // Get the linearized matrices.
+    SymEngine::DenseMatrix mat;
+    SymEngine::DenseMatrix vec;
+    std::tie(mat, vec) = this->convertToLinearSystem(variableOrdering);
+
+    // Get all parameters and variables
+    UnorderedSetSymbol parameters = this->getParameters();
+    UnorderedSetSymbol variables = this->getVariables();
+
+    // Verify that all parameters have a representation
+    for (RCP<const Symbol> parameter : parameters) {
+        if (!parameterOrdering.contains(parameter)) {
+            throw std::runtime_error(
+                    "Not all paramaters have a representations");
+        }
+    }
+
+    // Create the representations for the parameters
+    MapBasicString parameterRepr;
+    for (RCP<const Symbol> parameter : parameters) {
+        parameterRepr[parameter] =
+                "param[" +
+                std::to_string(parameterOrdering.indexOf(parameter)) + "]";
+    }
+
+    // Create the representations for the variables.
+    MapBasicString variableRepr;
+    for (RCP<const Symbol> variable : variables) {
+        variableRepr[variable] =
+                "state[" + std::to_string(variableOrdering.indexOf(variable)) +
+                "]";
+    }
+
+    std::string matrixName = "A";
+
+    std::stringstream ss;
+
+    // Function signature
+    ss << "Eigen::MatrixXd " << functionName;
+    ss << "(const Eigen::VectorXd& state, const Eigen::VectorXd& param) {";
+    ss << std::endl;
+
+    // The actual matrix xonstruction code
+    ss << generateCCode(mat, variableRepr, parameterRepr, matrixName);
+
+    ss << "return " << matrixName << ";" << std::endl;
+    ss << "}" << std::endl;
+
+    return ss.str();
 }
 
 }  // namespace cppmpc
