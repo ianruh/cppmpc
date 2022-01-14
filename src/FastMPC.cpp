@@ -152,7 +152,7 @@ std::optional<std::string> Objective::validate() const {
 
 Solver::Solver(const Objective& objective): objective(objective) {
 
-#ifdef VALIDATE_OBJECTIVE
+#ifdef NO_VALIDATE_OBJECTIVE
     // Check the objective dimenions all agree
     std::optional<std::string> objectiveValidationMessage = this->objective.validate();
     if(objectiveValidationMessage) {
@@ -176,24 +176,24 @@ std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
         currentDual = *dualStart;
     }
 
-#ifdef VALIDATE_OBJECTIVE
+#ifdef NO_VALIDATE_OBJECTIVE
     // Check that the start points are the right dimensions
     if(currentPoint.rows() != objective.numVariables()) {
         std::stringstream msg;
-        msg << "Primal start " << currentPoint << " does not have the same number of variables as the objective (" << objective.numVariables() << ")";
+        msg << "Primal start " << currentPoint.format(FlatFmt) << " does not have the same number of variables as the objective (" << objective.numVariables() << ")";
         throw std::runtime_error(msg.str());
     }
     // Check the dual (empty is no equality constraints)
     if(objective.numEqualityConstraints() > 0 && 
             currentDual.rows() != objective.numEqualityConstraints()) {
         std::stringstream msg;
-        msg << "Dual start " << currentDual << " does not have the same number of variables as equality constraints in the objective (" << objective.numEqualityConstraints() << ")";
+        msg << "Dual start " << currentDual.format(FlatFmt) << " does not have the same number of variables as equality constraints in the objective (" << objective.numEqualityConstraints() << ")";
         throw std::runtime_error(msg.str());
     }
 #endif // VALIDATE_OBJECTIVE
 
-    DEBUG("Starting Primal: " << currentPoint);
-    DEBUG("Starting Dual: " << currentDual);
+    DEBUG_PRINT("Starting Primal: " << currentPoint.format(FlatFmt));
+    DEBUG_PRINT("Starting Dual: " << currentDual.format(FlatFmt));
 
     // Hyper parameters
     double t = this->hyperParameters.homotopyParameterStart;
@@ -225,10 +225,10 @@ std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
             currentDual,
             t);
 
-        DEBUG(tSteps << ":" << iterations << "     Point:   " << currentPoint);
-        DEBUG(tSteps << ":" << iterations << "     Value:   " << value);
-        DEBUG(tSteps << ":" << iterations << "     Grad:    " << grad);
-        DEBUG(tSteps << ":" << iterations << "     Lambda:  " << lambda);
+        DEBUG_PRINT(tSteps << ":" << iterations << "     Point:   " << currentPoint.format(FlatFmt));
+        DEBUG_PRINT(tSteps << ":" << iterations << "     Value:   " << value);
+        DEBUG_PRINT(tSteps << ":" << iterations << "     Grad:    " << grad.format(FlatFmt));
+        DEBUG_PRINT(tSteps << ":" << iterations << "     Lambda:  " << lambda);
 
         while(lambda > this->hyperParameters.residualEpsilon &&
                 iterations < this->hyperParameters.newtonStepsStageMaximum &&
@@ -267,10 +267,10 @@ std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
                 currentDual,
                 t);
 
-            DEBUG(tSteps << ":" << iterations << "     Point:   " << currentPoint);
-            DEBUG(tSteps << ":" << iterations << "     Value:   " << value);
-            DEBUG(tSteps << ":" << iterations << "     Grad:    " << grad);
-            DEBUG(tSteps << ":" << iterations << "     Lambda:  " << lambda);
+            DEBUG_PRINT(tSteps << ":" << iterations << "     Point:   " << currentPoint.format(FlatFmt));
+            DEBUG_PRINT(tSteps << ":" << iterations << "     Value:   " << value);
+            DEBUG_PRINT(tSteps << ":" << iterations << "     Grad:    " << grad.format(FlatFmt));
+            DEBUG_PRINT(tSteps << ":" << iterations << "     Lambda:  " << lambda);
         }
 
         // If we have no inequality constraints, then our first homotopy stage is exact
@@ -288,11 +288,11 @@ HOMOTOPY_STAGES_LOOP_EXIT:
 
     double minimum = objective.value(currentPoint);
 
-    DEBUG("t: " << t);
-    DEBUG("Numer of Iterations: " << totalSteps);
-    DEBUG("Residual Norm: " << lambda);
-    DEBUG("Minimum Location: " << currentPoint);
-    DEBUG("Objective Value: " << minimum);
+    DEBUG_PRINT("t: " << t);
+    DEBUG_PRINT("Numer of Iterations: " << totalSteps);
+    DEBUG_PRINT("Residual Norm: " << lambda);
+    DEBUG_PRINT("Minimum Location: " << currentPoint.format(FlatFmt));
+    DEBUG_PRINT("Objective Value: " << minimum);
 
     return std::make_tuple(minimum, currentPoint, currentDual);
 

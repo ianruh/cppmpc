@@ -16,6 +16,11 @@ add_compile_options(-Wno-missing-field-initializers)
 # Make SWIG happy (something to do with dynamic linking)
 add_compile_options(-fPIC)
 
+# Set debug flags. These don't enable the debug flags, they just tell cmake
+# which flags to set in debug mode.
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 ################################# Dependencies ################################
@@ -79,8 +84,9 @@ add_executable(SymbolicTests
     tests/SymbolicObjectiveTest.cpp
     tests/GetSymbolsVisitorTest.cpp
     tests/OrderedSetTest.cpp
-    tests/EqualityConstraintTest.cpp)
-target_link_libraries(SymbolicTests cppmpc gtest_main symengine)
+    tests/EqualityConstraintTest.cpp
+    tests/FastMPCSimpleObjectiveTest.cpp)
+target_link_libraries(SymbolicTests cppmpc gtest_main symengine Eigen3::Eigen)
 
 include(GoogleTest)
 gtest_discover_tests(SymbolicTests)

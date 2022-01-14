@@ -7,8 +7,6 @@
 
 #include <Eigen/Dense>
 
-// TODO(ianruh): Init checks
-
 namespace cppmpc {
 
 namespace FastMPC {
@@ -131,11 +129,15 @@ class Objective {
     /// non-linear, this has to be the linearized equality constraints (possibly
     /// about the current/previous state).
     virtual std::optional<const Eigen::MatrixXd> equalityConstraintMatrix()
-            const = 0;
+            const {
+        return std::optional<const Eigen::MatrixXd>();
+    }
 
     /// The reuality constraint vector (the right hand side of  Ax=b).
     virtual std::optional<const Eigen::VectorXd> equalityConstraintVector()
-            const = 0;
+            const {
+        return std::optional<const Eigen::VectorXd>();
+    }
 
     //=========== Inequality Constraints ============
 
@@ -238,8 +240,8 @@ class Solver {
     /// The given primal should be strictly feasible, meaning it obeys all the inequality
     /// constraints, but may violate the equality constraints.
     std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> minimize(
-            std::optional<Eigen::VectorXd> primalStart,
-            std::optional<Eigen::VectorXd> dualStart) const;
+            std::optional<Eigen::VectorXd> primalStart = std::optional<Eigen::VectorXd>(),
+            std::optional<Eigen::VectorXd> dualStart = std::optional<Eigen::VectorXd>()) const;
 
     /// The norm of
     ///
