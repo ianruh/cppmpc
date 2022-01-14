@@ -8,24 +8,100 @@
 #include <Eigen/Dense>
 
 // TODO(ianruh): Init checks
-// TODO(ianruh): Core loop functions
-// TODO(ianruh): Residual  norm
-// TODO(ianruh): Infasible line search
-// TODO(ianruh): Barrier value
-// TODO(ianruh): Barrier gradient
-// TODO(ianruh): Barrier Hessian
 
 namespace cppmpc {
 
 namespace FastMPC {
 
+/**
+ * struct HyperParameters - Just a container for the hyper paramaters
+ * that can be used to customize the solved.
+ *
+ * The default values are firly aggressive, so will find a pretty
+ * precise solution. To improve runtime performance, the iteration
+ * maximums can be heavily restricted.
+ */
+typedef struct HyperParameters {
+    //==== Iteration Maximums ====
+
+    /**
+     * @newtonStepsStageMaximum - The maximum number of newton steps
+     * per homotopy stage.
+     */
+    int newtonStepsStageMaximum = 100;
+
+    /// The maximum number of homotopy stages to to perform.
+    int homotopyStagesMaximum = 50;
+
+    //==== Epsilons ====
+
+    /// The epsilon value used for the residual.
+    double residualEpsilon = 1.0e-3;
+
+    /// The epsilon value used for the primal-dual gap.
+    double dualGapEpsilon = 1.0e-3;
+
+    //==== Homtopy Parameters ====
+
+    /// The starting value of the homotopy barrier parameter.
+    double homotopyParameterStart = 1.0;
+
+    /// The multiplier for the homotopy barrier parameter. It is the factor that
+    /// the parameter increases by after every stage.
+    double homotopyParameterMultiplier = 20.0;
+
+    //==== Line Search ====
+    /// Back tracking line search alpha parameter
+    /// [reference](https://en.wikipedia.org/wiki/Backtracking_line_search
+    double lineSearchAlpha = 0.25;
+    /// Back tracking line  search beta  parameter
+    /// [reference](https://en.wikipedia.org/wiki/Backtracking_line_search)
+    double lineSearchBeta = 0.5;
+    /// The maximum number  of line search iterations.
+    int lineSearchMaximumIterations = 100;
+
+    //==== Misc ====
+    /// A threshold for the value of the objective, If this value is achieved,
+    /// then the solver returns. By default, the value is -inf, so has no effect
+    /// on the solver.
+    double valueThreshold = -1 * std::numeric_limits<double>::infinity();
+} HyperParameters;
+
 class Objective {
+ private:
+    friend class Solver;
+
+    /**
+     * @brief Validate that the dimensions of the objective all agree and the
+     * reported number of variables and constraints is correct.
+     *
+     */
+    std::optional<std::string> validate() const;
+
  public:
-    /// Number of variables taken by the objective
+    /**
+     * @brief Number of variables taken by the objective.
+     *
+     * This is called often in solving the function and should be efficient (
+     * e.g should not construct a matrix and check its dimensions every time).
+     */
     virtual int numVariables() const = 0;
 
-    /// Number of inequality constraints
-    virtual int numConstraints() const = 0;
+    /**
+     * @brief Number of inequality constraints.
+     *
+     * This is called often in solving the function and should be efficient (
+     * e.g should not construct a matrix and check its dimensions every time).
+     */
+    virtual int numInequalityConstraints() const = 0;
+
+    /**
+     * @brief Number of equality constraints.
+     *
+     * This is called often in solving the function and should be efficient (
+     * e.g should not construct a matrix and check its dimensions every time).
+     */
+    virtual int numEqualityConstraints() const = 0;
 
     //==================== Objective =================
 
@@ -140,62 +216,109 @@ class Objective {
 };
 
 class Solver {
+ private:
+    // TODO(ianruh): Get and set hyper parameters
+    HyperParameters hyperParameters;
+
+    const Objective& objective;
+
  public:
-    Solver();
-};
-
-/**
- * struct HyperParameters - Just a container for the hyper paramaters
- * that can be used to customize the solved.
- *
- * The default values are firly aggressive, so will find a pretty
- * precise solution. To improve runtime performance, the iteration
- * maximums can be heavily restricted.
- */
-struct HyperParameters {
-    //==== Iteration Maximums ====
-
     /**
-     * @newtonStepsStageMaximum - The maximum number of newton steps
-     * per homotopy stage.
+     * @brief Validate that the given objective is well formed.
+     *
+     * @param objective The objective that will be optimized.
      */
-    int newtonStepsStageMaximum = 100;
+    Solver(const Objective& objective);
 
-    /// The maximum number of homotopy stages to to perform.
-    int homotopyStagesMaximum = 50;
+    /// Minimize an infeasible start, inequality constrained objective.
+    /// - Parameter objective: The objective to minimize.
+    /// - Throws: For many reasons, including (ill formed problems, evaluation problems, line search problems, and others).
+    /// - Returns: The minimum objective value, the minimum's primal, and the minimum's dual).
+    ///
+    /// The given primal should be strictly feasible, meaning it obeys all the inequality
+    /// constraints, but may violate the equality constraints.
+    std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> minimize(
+            std::optional<Eigen::VectorXd> primalStart,
+            std::optional<Eigen::VectorXd> dualStart) const;
 
-    //==== Epsilons ====
+    /// The norm of
+    ///
+    /// ```
+    /// ┌          ┐
+    /// │ ∇f + Aᵀν │
+    /// │  Ax - b  │
+    /// └          ┘
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - objective: The objective veing minimized.
+    ///   - primal: The current primal value.
+    ///   - dual: The current dual value
+    ///   - t: The current barrier parameter.
+    /// - Returns: The residual  of the norm.
+    double residualNorm(const Objective& objective,
+                        const Eigen::VectorXd& primal,
+                        const Eigen::VectorXd& dual, double t) const;
 
-    /// The epsilon value used for the residual.
-    double residualEpsilon = 1.0e-3;
+    /// Perform an infeasible start line search on the problem.
+    ///
+    /// If an exception is thrown saying that the maximum number of line search
+    /// iterations has been reached, That usually means the current  primal/dual
+    /// is infeasible, so it can't progress in any direction.
+    ///
+    /// - Parameters:
+    ///   - objective: The objective being minimized.
+    ///   - primalDirection: The primal direction to search in.
+    ///   - dualDirection: The dual direction to seach in.
+    ///   - startPrimal: The starting primal values.
+    ///   - startDual: The starting dual value.
+    ///   - t: The current barrier parameter.
+    /// - Throws: If the maximum number of line search iterations has been hit.
+    /// - Returns: The step length found.
+    double infeasibleLinesearch(const Objective& objective,
+                                const Eigen::VectorXd& primalDirection,
+                                const Eigen::VectorXd& dualDirection,
+                                const Eigen::VectorXd& startPrimal,
+                                const Eigen::VectorXd& startDual,
+                                double t) const;
 
-    /// The epsilon value used for the primal-dual gap.
-    double dualGapEpsilon = 1.0e-3;
+    /// The value of the barrier augmented objective.
+    /// - Parameters:
+    ///   - objective: The objective being minimized.
+    ///   - x: The current primal values.
+    ///   - t: The current barrier parameter.
+    /// - Returns: The augmented objective value.
+    double barrierValue(const Objective& objective,
+                        const Eigen::VectorXd& state, double t) const {
+        return t * objective.value(state) +
+               objective.inequalityConstraintsValue(state);
+    }
 
-    //==== Homtopy Parameters ====
+    /// The value of the barrier augmented objective's gradient.
+    /// - Parameters:
+    ///   - objective: The objective being minimized.
+    ///   - x: The current primal value.
+    ///   - t: The current barrier parameter.
+    /// - Returns: The augmented objective's gradient.
+    Eigen::VectorXd barrierGradient(const Objective& objective,
+                                    const Eigen::VectorXd& state,
+                                    double t) const {
+        return t * objective.gradient(state) +
+               objective.inequalityConstraintsGradient(state);
+    }
 
-    /// The starting value of the homotopy barrier parameter.
-    double homotopyParameterStart = 1.0;
-
-    /// The multiplier for the homotopy barrier parameter. It is the factor that
-    /// the parameter increases by after every stage.
-    double homotopyParameterMultiplier = 20.0;
-
-    //==== Line Search ====
-    /// Back tracking line search alpha parameter
-    /// [reference](https://en.wikipedia.org/wiki/Backtracking_line_search
-    double lineSearchAlpha = 0.25;
-    /// Back tracking line  search beta  parameter
-    /// [reference](https://en.wikipedia.org/wiki/Backtracking_line_search)
-    double lineSearchBeta = 0.5;
-    /// The maximum number  of line search iterations.
-    int lineSearchMaximumIterations = 100;
-
-    //==== Misc ====
-    /// A threshold for the value of the objective, If this value is achieved,
-    /// then the solver returns. By default, the value is -inf, so has no effect
-    /// on the solver.
-    double valueThreshold = -1 * std::numeric_limits<double>::infinity();
+    /// The value  of the augmented objective's hessian.
+    /// - Parameters:
+    ///   - objective: The objective being minimized.
+    ///   - x: The cureent primal value.
+    ///   - t: The current barrier parameter.
+    /// - Returns: The augmented  objective's hessian.
+    Eigen::MatrixXd barrierHessian(const Objective& objective,
+                                   const Eigen::VectorXd& state,
+                                   double t) const {
+        return t * objective.hessian(state) +
+               objective.inequalityConstraintsHessian(state);
+    }
 };
 
 }  // namespace FastMPC
