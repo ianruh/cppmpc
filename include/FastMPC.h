@@ -66,16 +66,6 @@ typedef struct HyperParameters {
 } HyperParameters;
 
 class Objective {
- private:
-    friend class Solver;
-
-    /**
-     * @brief Validate that the dimensions of the objective all agree and the
-     * reported number of variables and constraints is correct.
-     *
-     */
-    std::optional<std::string> validate() const;
-
  public:
     /**
      * @brief Number of variables taken by the objective.
@@ -215,6 +205,13 @@ class Objective {
     virtual std::pair<Eigen::VectorXd, Eigen::VectorXd> stepSolver(
             const Eigen::VectorXd& gradient, const Eigen::MatrixXd& hessian,
             const Eigen::VectorXd& primal, const Eigen::VectorXd& dual) const;
+
+    /**
+     * @brief Validate that the dimensions of the objective all agree and the
+     * reported number of variables and constraints is correct.
+     *
+     */
+    virtual std::optional<std::string> validate() const;
 };
 
 class Solver {
@@ -234,14 +231,18 @@ class Solver {
 
     /// Minimize an infeasible start, inequality constrained objective.
     /// - Parameter objective: The objective to minimize.
-    /// - Throws: For many reasons, including (ill formed problems, evaluation problems, line search problems, and others).
-    /// - Returns: The minimum objective value, the minimum's primal, and the minimum's dual).
+    /// - Throws: For many reasons, including (ill formed problems, evaluation
+    /// problems, line search problems, and others).
+    /// - Returns: The minimum objective value, the minimum's primal, and the
+    /// minimum's dual).
     ///
-    /// The given primal should be strictly feasible, meaning it obeys all the inequality
-    /// constraints, but may violate the equality constraints.
+    /// The given primal should be strictly feasible, meaning it obeys all the
+    /// inequality constraints, but may violate the equality constraints.
     std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> minimize(
-            std::optional<Eigen::VectorXd> primalStart = std::optional<Eigen::VectorXd>(),
-            std::optional<Eigen::VectorXd> dualStart = std::optional<Eigen::VectorXd>()) const;
+            std::optional<Eigen::VectorXd> primalStart =
+                    std::optional<Eigen::VectorXd>(),
+            std::optional<Eigen::VectorXd> dualStart =
+                    std::optional<Eigen::VectorXd>()) const;
 
     /// The norm of
     ///

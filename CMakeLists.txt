@@ -62,12 +62,14 @@ add_library(cppmpc
     src/GetSymbolsVisitor.cpp
     src/SymbolicEquality.cpp
     src/FastMPC.cpp
+    src/FastMPCFunctionPointerObjective.cpp
     include/SymbolicObjective.h
     include/SymEngineUtilities.h
     include/GetSymbolsVisitor.h
     include/SymbolicEquality.h
     include/OrderedSet.h
     include/FastMPC.h
+    include/FastMPCFunctionPointerObjective.h
 )
 target_include_directories(cppmpc PUBLIC include/)
 target_link_libraries(cppmpc symengine gmp Eigen3::Eigen)
@@ -85,7 +87,8 @@ add_executable(SymbolicTests
     tests/GetSymbolsVisitorTest.cpp
     tests/OrderedSetTest.cpp
     tests/EqualityConstraintTest.cpp
-    tests/FastMPCSimpleObjectiveTest.cpp)
+    tests/FastMPCSimpleObjectiveTest.cpp
+    tests/FastMPCFunctionPointerObjectiveTest.cpp)
 target_link_libraries(SymbolicTests cppmpc gtest_main symengine Eigen3::Eigen)
 
 include(GoogleTest)

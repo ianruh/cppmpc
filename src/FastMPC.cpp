@@ -113,84 +113,96 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> Objective::stepSolver(
     }
 }
 
-
 std::optional<std::string> Objective::validate() const {
-
-    std::optional<const Eigen::MatrixXd> equalityConstraintMatrix = this->equalityConstraintMatrix();
-    std::optional<const Eigen::VectorXd> equalityConstraintVector = this->equalityConstraintVector();
+    std::optional<const Eigen::MatrixXd> equalityConstraintMatrix =
+            this->equalityConstraintMatrix();
+    std::optional<const Eigen::VectorXd> equalityConstraintVector =
+            this->equalityConstraintVector();
     // Check that if the number of equalioty constraints is greater than 0,
     // then the matrix and vector are returned.
-    if(this->numEqualityConstraints() > 0) {
-        if(!equalityConstraintMatrix) {
-            return "No equality constraint matrix returned even when the number of constraints is > 0.";
+    if (this->numEqualityConstraints() > 0) {
+        if (!equalityConstraintMatrix) {
+            return "No equality constraint matrix returned even when the "
+                   "number of constraints is > 0.";
         }
-        if(!equalityConstraintVector) {
-            return "No equality constraint vector returned even when the number of constraints is > 0.";
+        if (!equalityConstraintVector) {
+            return "No equality constraint vector returned even when the "
+                   "number of constraints is > 0.";
         }
     }
 
     // Check that the equality constraint matix has the same number of columns
     // as the objective has variables
-    if(this->numEqualityConstraints() > 0) {
-        if(equalityConstraintMatrix->cols() != this->numVariables()) {
-            return "Equality constraint matrix has a different number of columns than the objective has variables";
+    if (this->numEqualityConstraints() > 0) {
+        if (equalityConstraintMatrix->cols() != this->numVariables()) {
+            return "Equality constraint matrix has a different number of "
+                   "columns than the objective has variables";
         }
     }
 
-    // Check that the equality constraint matrix and vector have the same number of rows
-    if(this->numEqualityConstraints() > 0) {
-        if(equalityConstraintMatrix->rows() != equalityConstraintVector->rows()) {
-            return "Equality constraint matrix and vector have different number of rows.";
+    // Check that the equality constraint matrix and vector have the same number
+    // of rows
+    if (this->numEqualityConstraints() > 0) {
+        if (equalityConstraintMatrix->rows() !=
+            equalityConstraintVector->rows()) {
+            return "Equality constraint matrix and vector have different "
+                   "number of rows.";
         }
     }
 
-    // TODO(ianruh): Figure out a good way to check off that other dimensions 
+    // TODO(ianruh): Figure out a good way to check off that other dimensions
     // for the state vector, gradient, and hessian here.
-    
+
     return std::optional<std::string>();
 }
 
-Solver::Solver(const Objective& objective): objective(objective) {
-
+Solver::Solver(const Objective& objective) : objective(objective) {
 #ifdef NO_VALIDATE_OBJECTIVE
     // Check the objective dimenions all agree
-    std::optional<std::string> objectiveValidationMessage = this->objective.validate();
-    if(objectiveValidationMessage) {
+    std::optional<std::string> objectiveValidationMessage =
+            this->objective.validate();
+    if (objectiveValidationMessage) {
         throw std::runtime_error(*objectiveValidationMessage);
     }
-#endif // VALIDATE_OBJECTIVE
+#endif  // VALIDATE_OBJECTIVE
 }
 
 std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
-            std::optional<Eigen::VectorXd> primalStart,
-            std::optional<Eigen::VectorXd> dualStart) const {
-
+        std::optional<Eigen::VectorXd> primalStart,
+        std::optional<Eigen::VectorXd> dualStart) const {
     // Default primal and dual starts
-    Eigen::VectorXd currentPoint = Eigen::VectorXd::Zero(this->objective.numVariables());
-    Eigen::VectorXd currentDual = Eigen::VectorXd::Ones(this->objective.numEqualityConstraints());
+    Eigen::VectorXd currentPoint =
+            Eigen::VectorXd::Zero(this->objective.numVariables());
+    Eigen::VectorXd currentDual =
+            Eigen::VectorXd::Ones(this->objective.numEqualityConstraints());
 
-    if(primalStart) {
+    if (primalStart) {
         currentPoint = *primalStart;
     }
-    if(dualStart) {
+    if (dualStart) {
         currentDual = *dualStart;
     }
 
 #ifdef NO_VALIDATE_OBJECTIVE
     // Check that the start points are the right dimensions
-    if(currentPoint.rows() != objective.numVariables()) {
+    if (currentPoint.rows() != objective.numVariables()) {
         std::stringstream msg;
-        msg << "Primal start " << currentPoint.format(FlatFmt) << " does not have the same number of variables as the objective (" << objective.numVariables() << ")";
+        msg << "Primal start " << currentPoint.format(FlatFmt)
+            << " does not have the same number of variables as the objective ("
+            << objective.numVariables() << ")";
         throw std::runtime_error(msg.str());
     }
     // Check the dual (empty is no equality constraints)
-    if(objective.numEqualityConstraints() > 0 && 
-            currentDual.rows() != objective.numEqualityConstraints()) {
+    if (objective.numEqualityConstraints() > 0 &&
+        currentDual.rows() != objective.numEqualityConstraints()) {
         std::stringstream msg;
-        msg << "Dual start " << currentDual.format(FlatFmt) << " does not have the same number of variables as equality constraints in the objective (" << objective.numEqualityConstraints() << ")";
+        msg << "Dual start " << currentDual.format(FlatFmt)
+            << " does not have the same number of variables as equality "
+               "constraints in the objective ("
+            << objective.numEqualityConstraints() << ")";
         throw std::runtime_error(msg.str());
     }
-#endif // VALIDATE_OBJECTIVE
+#endif  // VALIDATE_OBJECTIVE
 
     DEBUG_PRINT("Starting Primal: " << currentPoint.format(FlatFmt));
     DEBUG_PRINT("Starting Dual: " << currentDual.format(FlatFmt));
@@ -203,54 +215,45 @@ std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
     double value = objective.value(currentPoint);
     Eigen::VectorXd grad = this->barrierGradient(objective, currentPoint, t);
     Eigen::MatrixXd H = this->barrierHessian(objective, currentPoint, t);
-    double lambda = this->residualNorm(
-            objective,
-            currentPoint,
-            currentDual,
-            t);
+    double lambda = this->residualNorm(objective, currentPoint, currentDual, t);
 
-    bool homotopyStagesExitCondition = (objective.numInequalityConstraints() == 0) ||
-        (double(objective.numInequalityConstraints()) / t > this->hyperParameters.dualGapEpsilon);
+    bool homotopyStagesExitCondition =
+            (objective.numInequalityConstraints() == 0) ||
+            (double(objective.numInequalityConstraints()) / t >
+             this->hyperParameters.dualGapEpsilon);
 
     // goto HOMOTOPY_STAGES_LOOP_EXIT is used to break out of this outer loop.
-    while(homotopyStagesExitCondition &&
-            tSteps < this->hyperParameters.homotopyStagesMaximum &&
-            value > this->hyperParameters.valueThreshold) {
+    while (homotopyStagesExitCondition &&
+           tSteps < this->hyperParameters.homotopyStagesMaximum &&
+           value > this->hyperParameters.valueThreshold) {
         int iterations = 0;
 
         // This needs to be recalulated because we changed t
-        lambda = this->residualNorm(
-            objective,
-            currentPoint,
-            currentDual,
-            t);
+        lambda = this->residualNorm(objective, currentPoint, currentDual, t);
 
-        DEBUG_PRINT(tSteps << ":" << iterations << "     Point:   " << currentPoint.format(FlatFmt));
+        DEBUG_PRINT(tSteps << ":" << iterations
+                           << "     Point:   " << currentPoint.format(FlatFmt));
         DEBUG_PRINT(tSteps << ":" << iterations << "     Value:   " << value);
-        DEBUG_PRINT(tSteps << ":" << iterations << "     Grad:    " << grad.format(FlatFmt));
+        DEBUG_PRINT(tSteps << ":" << iterations
+                           << "     Grad:    " << grad.format(FlatFmt));
         DEBUG_PRINT(tSteps << ":" << iterations << "     Lambda:  " << lambda);
 
-        while(lambda > this->hyperParameters.residualEpsilon &&
-                iterations < this->hyperParameters.newtonStepsStageMaximum &&
-                value > this->hyperParameters.valueThreshold) {
+        while (lambda > this->hyperParameters.residualEpsilon &&
+               iterations < this->hyperParameters.newtonStepsStageMaximum &&
+               value > this->hyperParameters.valueThreshold) {
             // Both of these are Eigen::VectorXd. idk why it needs to be auto
-            auto [stepDirectionPrimal, stepDirectionDual] = objective.stepSolver(
-                grad,
-                H,
-                currentPoint,
-                currentDual);
+            auto [stepDirectionPrimal, stepDirectionDual] =
+                    objective.stepSolver(grad, H, currentPoint, currentDual);
 
-            // TODO: the next point value and residual are calculated twice, once in the line search and
-            // again when actually calculating it. This would be a good place for memoization
+            // TODO: the next point value and residual are calculated twice,
+            // once in the line search and again when actually calculating it.
+            // This would be a good place for memoization
 
-            // Not really the step length as the newton step direction isn't normalized
+            // Not really the step length as the newton step direction isn't
+            // normalized
             double stepLength = this->infeasibleLinesearch(
-                objective,
-                stepDirectionPrimal,
-                stepDirectionDual,
-                currentPoint,
-                currentDual,
-                t);
+                    objective, stepDirectionPrimal, stepDirectionDual,
+                    currentPoint, currentDual, t);
 
             currentPoint = currentPoint + stepLength * stepDirectionPrimal;
             currentDual = currentDual + stepLength * stepDirectionDual;
@@ -261,27 +264,31 @@ std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
             value = objective.value(currentPoint);
             grad = this->barrierGradient(objective, currentPoint, t);
             H = this->barrierHessian(objective, currentPoint, t);
-            lambda = this->residualNorm(
-                objective,
-                currentPoint,
-                currentDual,
-                t);
+            lambda =
+                    this->residualNorm(objective, currentPoint, currentDual, t);
 
-            DEBUG_PRINT(tSteps << ":" << iterations << "     Point:   " << currentPoint.format(FlatFmt));
-            DEBUG_PRINT(tSteps << ":" << iterations << "     Value:   " << value);
-            DEBUG_PRINT(tSteps << ":" << iterations << "     Grad:    " << grad.format(FlatFmt));
-            DEBUG_PRINT(tSteps << ":" << iterations << "     Lambda:  " << lambda);
+            DEBUG_PRINT(tSteps << ":" << iterations << "     Point:   "
+                               << currentPoint.format(FlatFmt));
+            DEBUG_PRINT(tSteps << ":" << iterations
+                               << "     Value:   " << value);
+            DEBUG_PRINT(tSteps << ":" << iterations
+                               << "     Grad:    " << grad.format(FlatFmt));
+            DEBUG_PRINT(tSteps << ":" << iterations
+                               << "     Lambda:  " << lambda);
         }
 
-        // If we have no inequality constraints, then our first homotopy stage is exact
-        if(objective.numInequalityConstraints() == 0) {
+        // If we have no inequality constraints, then our first homotopy stage
+        // is exact
+        if (objective.numInequalityConstraints() == 0) {
             goto HOMOTOPY_STAGES_LOOP_EXIT;
         }
 
         t *= this->hyperParameters.homotopyParameterMultiplier;
         tSteps += 1;
-        homotopyStagesExitCondition = (objective.numInequalityConstraints() == 0) ||
-            (double(objective.numInequalityConstraints()) / t > this->hyperParameters.dualGapEpsilon);
+        homotopyStagesExitCondition =
+                (objective.numInequalityConstraints() == 0) ||
+                (double(objective.numInequalityConstraints()) / t >
+                 this->hyperParameters.dualGapEpsilon);
     }
 
 HOMOTOPY_STAGES_LOOP_EXIT:
@@ -295,7 +302,6 @@ HOMOTOPY_STAGES_LOOP_EXIT:
     DEBUG_PRINT("Objective Value: " << minimum);
 
     return std::make_tuple(minimum, currentPoint, currentDual);
-
 }
 
 double Solver::residualNorm(const Objective& objective,

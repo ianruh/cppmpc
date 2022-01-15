@@ -2,34 +2,38 @@
 #include <gtest/gtest.h>
 
 #include <Eigen/Dense>
-#include <optional>
 #include <cmath>
 #include <iostream>
+#include <optional>
 
 #include "FastMPC.h"
 #include "Util.h"
 
 using namespace cppmpc;
 
-class UnconstrainedQuadraticObjective: public FastMPC::Objective {
+class UnconstrainedQuadraticObjective : public FastMPC::Objective {
  public:
     virtual int numVariables() const override { return 1; }
     virtual int numInequalityConstraints() const override { return 0; }
     virtual int numEqualityConstraints() const override { return 0; }
-    
+
     virtual double value(const Eigen::VectorXd& state) const override {
         return state(0) * state(0);
     }
-    virtual const Eigen::VectorXd gradient(const Eigen::VectorXd& state) const override {
+    virtual const Eigen::VectorXd gradient(
+            const Eigen::VectorXd& state) const override {
         return 2 * state;
     }
-    virtual const Eigen::MatrixXd hessian([[maybe_unused]] const Eigen::VectorXd& state) const override {
-        return 2.0 * Eigen::MatrixXd::Identity(this->numVariables(), this->numVariables()); 
+    virtual const Eigen::MatrixXd hessian([
+            [maybe_unused]] const Eigen::VectorXd& state) const override {
+        return 2.0 * Eigen::MatrixXd::Identity(this->numVariables(),
+                                               this->numVariables());
     }
 };
 
 TEST(FastMPCTests, UnconstrainedQuadraticObjective) {
-    UnconstrainedQuadraticObjective objective = UnconstrainedQuadraticObjective();
+    UnconstrainedQuadraticObjective objective =
+            UnconstrainedQuadraticObjective();
 
     FastMPC::Solver solver = FastMPC::Solver(objective);
 
@@ -50,44 +54,52 @@ TEST(FastMPCTests, UnconstrainedQuadraticObjective) {
  *  - x[1] > 2   --->    -x[1] - 2 < 0
  *
  */
-class ConstrainedQuadraticObjective: public FastMPC::Objective {
+class ConstrainedQuadraticObjective : public FastMPC::Objective {
  public:
     virtual int numVariables() const override { return 2; }
     virtual int numInequalityConstraints() const override { return 1; }
     virtual int numEqualityConstraints() const override { return 1; }
-    
+
     virtual double value(const Eigen::VectorXd& state) const override {
         return state.dot(state);
     }
-    virtual const Eigen::VectorXd gradient(const Eigen::VectorXd& state) const override {
+    virtual const Eigen::VectorXd gradient(
+            const Eigen::VectorXd& state) const override {
         return 2 * state;
     }
-    virtual const Eigen::MatrixXd hessian([[maybe_unused]] const Eigen::VectorXd& state) const override {
-        return 2.0 * Eigen::MatrixXd::Identity(this->numVariables(), this->numVariables()); 
+    virtual const Eigen::MatrixXd hessian([
+            [maybe_unused]] const Eigen::VectorXd& state) const override {
+        return 2.0 * Eigen::MatrixXd::Identity(this->numVariables(),
+                                               this->numVariables());
     }
 
-    virtual std::optional<const Eigen::MatrixXd> equalityConstraintMatrix() const override {
+    virtual std::optional<const Eigen::MatrixXd> equalityConstraintMatrix()
+            const override {
         Eigen::MatrixXd mat(1, 2);
         mat << 1.0, 0.0;
         return mat;
     }
-    virtual std::optional<const Eigen::VectorXd> equalityConstraintVector() const override {
+    virtual std::optional<const Eigen::VectorXd> equalityConstraintVector()
+            const override {
         Eigen::VectorXd vec(1);
         vec << 3.0;
         return vec;
     }
 
-    virtual double inequalityConstraintsValue(const Eigen::VectorXd& state) const override {
-        return -1*std::log((state(1) - 2.0));
+    virtual double inequalityConstraintsValue(
+            const Eigen::VectorXd& state) const override {
+        return -1 * std::log((state(1) - 2.0));
     }
-    virtual const Eigen::VectorXd inequalityConstraintsGradient(const Eigen::VectorXd& state) const override {
+    virtual const Eigen::VectorXd inequalityConstraintsGradient(
+            const Eigen::VectorXd& state) const override {
         Eigen::VectorXd grad(2);
-        grad << 0.0, -1.0/(state(1) - 2.0);
+        grad << 0.0, -1.0 / (state(1) - 2.0);
         return grad;
     }
-    virtual const Eigen::MatrixXd inequalityConstraintsHessian(const Eigen::VectorXd& state) const override {
-        Eigen::MatrixXd mat(2,2);
-        mat << 0.0, 0.0, 0.0, 1.0/std::pow((state(1) - 2.0),2);
+    virtual const Eigen::MatrixXd inequalityConstraintsHessian(
+            const Eigen::VectorXd& state) const override {
+        Eigen::MatrixXd mat(2, 2);
+        mat << 0.0, 0.0, 0.0, 1.0 / std::pow((state(1) - 2.0), 2);
         return mat;
     }
 };
