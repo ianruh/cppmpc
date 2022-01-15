@@ -1,20 +1,33 @@
 #!/bin/bash
 
+#--- Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+#---
+
 ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
-  
+SYMENGINE_REPO="https://github.com/symengine/symengine.git"
+SYMENGINE_COMMIT="5c47488c5d1df382d36959b0dad14916dd745f54"
+CC=clang
+CXX=clang++
+
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
     echo "Subcommands:"
-    echo "    build        Build the library"
-    echo "    clean        Clean all build artifacts"
-    echo "    cpplint      Lint all of the c++ code using cpplint"
-    echo "    copyright    Place the copyright at the top of all source files"
-    echo "    format       Format all code using flake8 and clang-format"
-    echo "    format-cpp   Format c/c++ code using clang-format"
-    echo "    format-py    Format python code using flake8"
-    echo "    todo         Search todos in the code"
-    echo "    test         Run all C++ and python tests"
+    echo "    build             Build the library"
+    echo "    build-debug       Build the library"
+    echo "    clean             Clean all build artifacts"
+    echo "    clean-all         Clean all build artifacts and delete build/"
+    echo "    cpplint           Lint all of the c++ code using cpplint"
+    echo "    copyright         Place the copyright at the top of all source files"
+    echo "    format            Format all code using flake8 and clang-format"
+    echo "    format-cpp        Format c/c++ code using clang-format"
+    echo "    todo              Search todos in the code"
+    echo "    test              Run all C++ and python tests"
+    echo "    install-kernel    Install the jupyter kernel"
+    echo "    bootstrap         Build the dependencies that need to be built from source"
     echo ""
     echo "For help with each subcommand run:"
     echo "$ProgName <subcommand> -h|--help"
@@ -26,18 +39,92 @@ sub_help(){
 # Args:
 #   $1: Section name
 util_section_header() {
-    echo ""
-    echo "############### $1 ################"
+    printf "############### $1 ################\n"
 }
+
+util_check_conda() {
+    if [[ -z "$CONDA_PREFIX" ]]; then
+        printf "${RED}\$CONDA_PREFIX environment variable not set. Do you need to activate the environment?${NC}\n"
+        exit 1
+    fi
+}
+
+sub_bootstrap() {
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
+    util_section_header "Building and Installing SymEngine"
+    printf "Using install prefix $CONDA_PREFIX\n"
+
+    # Make a third party directory is one doesn't exist
+    if ! [[ -d third_party/ ]]; then
+        mkdir third_party/
+    fi
+
+    cd third_party/
+
+    # Clone symengine if not already cloned
+    if ! [[ -d symengine ]]; then
+        git clone "$SYMENGINE_REPO" symengine
+    else
+        # Just fetch origin if already cloned
+        cd symengine
+        git fetch origin
+        cd ../
+    fi
+
+    cd symengine
+
+    # Checkout our required commit
+    git checkout "$SYMENGINE_COMMIT"
+
+    # Make a build dir if there isn't already one
+    if ! [[ -d build/ ]]; then
+        mkdir build
+    fi
+
+    cd build/
+
+    # Run cmake with our given prefixes
+    cmake \
+        -D CMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -D CMAKE_C_COMPILER=$CC \
+        -D CMAKE_CXX_COMPILER=$CXX \
+        -D CMAKE_INSTALL_LIBDIR=${CONDA_PREFIX}/lib \
+        -DBUILD_TESTS=OFF \
+        -DBUILD_BENCHMARKS=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+        ..
+
+    make -j8
+    make install
+
+    cd "$original_wd"
+}
+
+
+sub_install-kernel() {
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
+    jupyter kernelspec install $CONDA_PREFIX/share/jupyter/kernels/xcpp17 \
+        --user --name=cppmpc-cpp17
+
+    cd "$original_wd"
+}
+
 
 # Run all of the python and C++ tests.
 #
 # Args: None
 sub_test() {
     
+    util_check_conda
     util_section_header "Building"
     # Build first
-    sub_build
+    sub_build-debug
  
     # Stop if the build failed
     if [[ "$?" != "0" ]]; then
@@ -52,10 +139,6 @@ sub_test() {
     util_section_header "C++ Tests"
     cd ./build/
     ctest
-
-    util_section_header "Python Tests"
-    cd ../
-    pytest
 
     cd "$original_wd"
 }
@@ -170,17 +253,59 @@ sub_cpplint() {
 
 sub_build() { 
     original_wd=$(pwd)
-
     cd "$(git rev-parse --show-toplevel)"
 
-    if [ -d ./build/ ]; then
-        cd ./build/
-    else
+    util_check_conda
+
+    if ! [ -d ./build/ ]; then
         mkdir ./build/
-        cd ./build/
+    fi
+    cd ./build/
+
+    cmake \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -D CMAKE_C_COMPILER=$CC \
+        -D CMAKE_CXX_COMPILER=$CXX \
+        -D CMAKE_INSTALL_LIBDIR=${CONDA_PREFIX}/lib \
+        ..
+    
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        cd "$original_wd"
+        return 1;
     fi
 
-    cmake ..
+    make -j8
+
+    # Stop if the build failed
+    if [[ "$?" != "0" ]]; then
+        cd "$original_wd"
+        return 1;
+    fi
+
+    cd "$original_wd"
+}
+
+# Build in debug mode
+sub_build-debug() { 
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
+
+    if ! [ -d ./build/ ]; then
+        mkdir ./build/
+    fi
+    cd ./build/
+
+    cmake \
+        -D CMAKE_BUILD_TYPE=Debug \
+        -D CMAKE_INSTALL_PREFIX=${CONDA_PREFIX} \
+        -D CMAKE_C_COMPILER=$CC \
+        -D CMAKE_CXX_COMPILER=$CXX \
+        -D CMAKE_INSTALL_LIBDIR=${CONDA_PREFIX}/lib \
+        ..
     
     # Stop if the build failed
     if [[ "$?" != "0" ]]; then
@@ -204,19 +329,33 @@ sub_clean() {
 
     cd "$(git rev-parse --show-toplevel)"
 
+    if [[ -d build/ ]]; then
+        cd ./build/
+        if [ -f Makefile ]; then
+            make clean
+        fi
+    fi
+
+    cd "$original_wd"
+}
+
+sub_clean-all() { 
+    original_wd=$(pwd)
+
+    cd "$(git rev-parse --show-toplevel)"
+
     if [ -d ./build/ ]; then
         rm -rf ./build/
     fi
 
-    rm -f ./cppmpc_py/_cppmpc_swig.so
-    rm -f ./cppmpc_py/cppmpc.py
-    rm -f ./cppmpc_py/cppmpcPYTHON_wrap.cxx
+    if [ -d third_party ]; then
+        rm -rf third_party/ 
+    fi
 
     cd "$original_wd"
 }
 
 sub_format() {
-    sub_format-py
     sub_format-cpp
 }
   
@@ -226,16 +365,6 @@ sub_format-cpp(){
     cd "$(git rev-parse --show-toplevel)"
     fd ".*\.($CPP_EXTENSIONS)" ./include/ ./src/ ./tests/ | \
         xargs clang-format -i
-
-    cd "$original_wd"
-}
-
-sub_format-py(){
-    original_wd=$(pwd)
-
-    cd "$(git rev-parse --show-toplevel)"
-    fd ".*\.(py)" ./tests/ | \
-        xargs black
 
     cd "$original_wd"
 }

@@ -20,7 +20,6 @@ void GetSymbolsVisitor::bvisit(const SymEngine::Symbol &x) {
 }
 
 void GetSymbolsVisitor::bvisit(const SymEngine::Basic &b) {
-    std::cout << b << std::endl;
     for (const auto &p : b.get_args()) {
         p->accept(*this);
     }
@@ -29,11 +28,6 @@ void GetSymbolsVisitor::bvisit(const SymEngine::Basic &b) {
 UnorderedSetSymbol GetSymbolsVisitor::apply(const SymEngine::Basic &b) {
     b.accept(*this);
     return this->symbols;
-}
-
-UnorderedSetSymbol getSymbols(const RCP<const Basic> &basic) {
-    GetSymbolsVisitor visitor;
-    return visitor.apply(*basic.get());
 }
 
 }  // namespace cppmpc

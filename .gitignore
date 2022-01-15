@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+third_party/
+.ipynb_checkpoints/
+*.vim

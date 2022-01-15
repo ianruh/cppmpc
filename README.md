@@ -1,9 +1,7 @@
 # CPP MPC
 
-**Dependencies**
-- [SWIG](http://www.swig.org/Doc4.0/Preface.html#Preface)
-- [SymEngine](https://github.com/symengine/symengine)
-- [GMP](https://gmplib.org/)
+**Setup**
+`mamba create -n cppmpc -c conda-forge cmake xeus-cling cling=0.8 eigen gmp gcc_linux-64`
 
 **Dev Dependencies**
 - fd
@@ -30,3 +28,7 @@ So, the setup procedure needs to look something like this:
 7. Run `pip install -e cppmpc_py/` if developing, otherwise just
    `pip install cppmpc_py/`
 7. Run the python tests to make sure everything is hunky-dory.
+
+**Compilation Options**
+- `NO_VALIDATE_OBJECTIVE` Don't check the dimensions of the objective before 
+  solving the problem. This can speed up the initialization time for the solver
