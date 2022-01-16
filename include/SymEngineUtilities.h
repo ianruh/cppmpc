@@ -61,6 +61,8 @@ void expandAll(SymEngine::DenseMatrix& mat);
  * passed symbolic matrix, using the given strings as representations for the
  * variables and parameters.
  *
+ * The matrix elements are set in columns major order.
+ *
  * @param mat The symbolic mat the matrix eigne matrix is based on.
  * @param variableRepr A map of variables to symbols.
  * @param parameterRepr A map of parameters to symbols.

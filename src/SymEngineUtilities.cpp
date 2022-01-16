@@ -134,14 +134,13 @@ std::string generateCCode(const SymEngine::DenseMatrix& mat,
 
     std::stringstream ss;
 
-    ss << "Eigen::MatrixXd " << matrixName << "(" << mat.nrows() << ","
-       << mat.ncols() << ");" << std::endl;
-    for (size_t row = 0; row < mat.nrows(); row++) {
-        for (size_t col = 0l; col < mat.ncols(); col++) {
+    int count = 0;
+    for (size_t col = 0; col < mat.ncols(); col++) {
+        for (size_t row = 0; row < mat.nrows(); row++) {
             RCP<const Basic> replaced = SymEngine::expand(
                     SymEngine::xreplace(mat.get(row, col), symbolsRepMap));
-            ss << matrixName << "(" << row << "," << col
-               << ") = " << SymEngine::ccode(*replaced) << ";" << std::endl;
+            ss << matrixName << "[" << std::to_string(count) << "] = " << SymEngine::ccode(*replaced) << ";" << std::endl;
+            count += 1;
         }
     }
 

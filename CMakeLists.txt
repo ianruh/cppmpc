@@ -63,6 +63,7 @@ add_library(cppmpc
     src/SymbolicEquality.cpp
     src/FastMPC.cpp
     src/FastMPCFunctionPointerObjective.cpp
+    src/CodeGenerator.cpp
     include/SymbolicObjective.h
     include/SymEngineUtilities.h
     include/GetSymbolsVisitor.h
@@ -70,9 +71,10 @@ add_library(cppmpc
     include/OrderedSet.h
     include/FastMPC.h
     include/FastMPCFunctionPointerObjective.h
+    include/CodeGenerator.h
 )
 target_include_directories(cppmpc PUBLIC include/)
-target_link_libraries(cppmpc symengine gmp Eigen3::Eigen)
+target_link_libraries(cppmpc symengine gmp Eigen3::Eigen ${CMAKE_DL_LIBS})
 
 ######## Executables ########
 
@@ -88,7 +90,8 @@ add_executable(SymbolicTests
     tests/OrderedSetTest.cpp
     tests/EqualityConstraintTest.cpp
     tests/FastMPCSimpleObjectiveTest.cpp
-    tests/FastMPCFunctionPointerObjectiveTest.cpp)
+    tests/FastMPCFunctionPointerObjectiveTest.cpp
+    tests/CodeGeneratorTest.cpp)
 target_link_libraries(SymbolicTests cppmpc gtest_main symengine Eigen3::Eigen)
 
 include(GoogleTest)

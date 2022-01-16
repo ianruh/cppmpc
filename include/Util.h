@@ -16,4 +16,6 @@ inline Eigen::IOFormat FlatFmt(4, 0, ", ", ";", "", "", "[", "]");
 #define DEBUG_PRINT(X)
 #endif  // DEBUG
 
+#define CPP_COMPILER_PATH "clang"
+
 #endif  // INCLUDE_UTIL_H_
