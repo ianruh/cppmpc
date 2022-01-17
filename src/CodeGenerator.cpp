@@ -73,7 +73,7 @@ std::string CodeGenerator::generateDenseMatrixCode(const SymEngine::DenseMatrix&
     return ss.str();
 }
 
-std::pair<std::string, std::string> CodeGenerator::generateSymbolicEqualityCode(
+std::pair<std::string, std::string> CodeGenerator::generateSymbolicEqualityFunctions(
         const SymbolicEqualityConstraints& symbolicConstraints,
         const OrderedSet& variableOrdering,
         const OrderedSet& parameterOrdering,

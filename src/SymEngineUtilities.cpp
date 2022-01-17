@@ -7,6 +7,7 @@
 #include <symengine/printers.h>
 #include <symengine/subs.h>
 #include <symengine/symbol.h>
+#include <symengine/derivative.h>
 
 #include <iostream>
 #include <sstream>
@@ -15,6 +16,7 @@
 #include <unordered_set>
 
 #include "GetSymbolsVisitor.h"
+#include "OrderedSet.h"
 
 namespace cppmpc {
 
@@ -28,6 +30,36 @@ RCP<const Symbol> variable(const std::string& name) {
 
 RCP<const Symbol> parameter(const std::string& name) {
     return SymEngine::symbol("$p_" + name);
+}
+
+SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
+                                const OrderedSet& variableOrdering) {
+
+    SymEngine::DenseMatrix grad(variableOrdering.size(),1);
+    for(size_t i = 0; i < variableOrdering.size(); i++) {
+        RCP<const Symbol> symbol = variableOrdering.at(i);
+        grad.set(i, 0, SymEngine::diff(basic, symbol));
+    }
+
+    return grad;
+}
+
+SymEngine::DenseMatrix hessian(const RCP<const Basic>& basic,
+                                const OrderedSet& variableOrdering) {
+
+    SymEngine::DenseMatrix hess(variableOrdering.size(), variableOrdering.size());
+
+    for(size_t row = 0; row < variableOrdering.size(); row++) {
+        for(size_t col = 0; col < variableOrdering.size(); col++) {
+            RCP<const Symbol> symbol_row = variableOrdering.at(row);
+            RCP<const Symbol> symbol_col = variableOrdering.at(col);
+            RCP<const Basic> d_row = SymEngine::diff(basic, symbol_row);
+            RCP<const Basic> d_row_col = SymEngine::diff(d_row, symbol_col);
+            hess.set(row, col, d_row_col);
+        }
+    }
+
+    return hess;
 }
 
 UnorderedSetSymbol getSymbols(const RCP<const Basic>& basic) {
@@ -89,6 +121,12 @@ void expandAll(SymEngine::DenseMatrix& mat) {
         for (size_t col = 0; col < mat.ncols(); col++) {
             mat.set(row, col, SymEngine::expand(mat.get(row, col)));
         }
+    }
+}
+
+void util_union(UnorderedSetSymbol& base, const UnorderedSetSymbol& other) {
+    for (auto el : other) {
+        base.insert(el);
     }
 }
 

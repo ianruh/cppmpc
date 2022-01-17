@@ -10,6 +10,8 @@
 #include <string>
 #include <unordered_set>
 
+#include "OrderedSet.h"
+
 namespace cppmpc {
 
 using SymEngine::Basic;
@@ -23,12 +25,50 @@ typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
 typedef std::map<RCP<const Basic>, std::string, SymEngine::RCPBasicKeyLess>
         MapBasicString;
 
-// Create a symbol with the `$v_` prefix indicating it is an active variable
+/**
+ * @brief Create a symbol with the `$v_` prefix indicating it is an active
+ * variable.
+ *
+ * @param name The name of the variable.
+ */
 RCP<const Symbol> variable(const std::string& name);
 
-// Create a symbol with th `$p_` prefix indicating it is not an active variable
+/**
+ * @brief Create a symbol with the `$p_` prefix indicating it is not an active
+ * variable.
+ *
+ * @param name The name of the parameter.
+ */
 RCP<const Symbol> parameter(const std::string& name);
 
+/**
+ * @brief Get the gradient of the basic using the given variable ordering.
+ *
+ * @param basic The basic.
+ * @param variableOrdering The variable ordering.
+ *
+ * @return A 1xn matrix contatining the gradient of the basic.
+ */
+SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
+                                const OrderedSet& variableOrdering);
+
+/**
+ * @brief Get the hessian of the basic using the given variable ordering.
+ *
+ * @param basic The basic.
+ * @param variableOrdering The variable ordering.
+ *
+ * @return An nxn matrix containing the hessian of the basic.
+ */
+SymEngine::DenseMatrix hessian(const RCP<const Basic>& basic,
+                               const OrderedSet& variableOrdering);
+
+/**
+ * @brief Get all the symbols present in a basic.
+ *
+ * @param basic The basic
+ * @return The unordered set of symbols in the basic.
+ */
 UnorderedSetSymbol getSymbols(const RCP<const Basic>& basic);
 
 // Get the variables in a given basic. All variables are just symbols whose
@@ -44,6 +84,14 @@ UnorderedSetSymbol getVariables(const SymEngine::DenseMatrix& mat);
 // For example, a parameter named `i`, is a symbol with name `$p_i`.
 UnorderedSetSymbol getParameters(const RCP<const Basic>& basic);
 UnorderedSetSymbol getParameters(const SymEngine::DenseMatrix& mat);
+
+/**
+ * @brief Take an inplace union of twp unordered sets.
+ *
+ * @param base The set to get stuff inserted into.
+ * @param other The set to insert into the base.
+ */
+void util_union(UnorderedSetSymbol& base, const UnorderedSetSymbol& other);
 
 // This is a utility just used to test that the swig wrappers can convert to
 // and from RCP<const Basic>.

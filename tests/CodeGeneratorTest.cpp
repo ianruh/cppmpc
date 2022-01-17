@@ -45,7 +45,7 @@ TEST(CodeGeneratorTests, SymbolicEquality) {
 
     std::string mat;
     std::string vec;
-    std::tie(mat,vec) = CodeGenerator::generateSymbolicEqualityCode(
+    std::tie(mat,vec) = CodeGenerator::generateSymbolicEqualityFunctions(
             constraints,
             variableOrdering,
             parameterOrdering,

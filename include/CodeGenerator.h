@@ -44,7 +44,7 @@ class CodeGenerator {
      * @param parameterOrdering Parameter ordering to use.
      * @param functionName The name of the function to generate.
      */
-    static std::pair<std::string, std::string> generateSymbolicEqualityCode(
+    static std::pair<std::string, std::string> generateSymbolicEqualityFunctions(
             const SymbolicEqualityConstraints& symbolicConstraints,
             const OrderedSet& variableOrdering,
             const OrderedSet& parameterOrdering,

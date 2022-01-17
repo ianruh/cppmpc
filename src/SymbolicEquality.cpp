@@ -22,12 +22,6 @@ using SymEngine::Basic;
 using SymEngine::RCP;
 using SymEngine::Symbol;
 
-void util_union(UnorderedSetSymbol& base, const UnorderedSetSymbol& other) {
-    for (auto el : other) {
-        base.insert(el);
-    }
-}
-
 void SymbolicEqualityConstraints::appendConstraint(const RCP<const Basic>& b) {
     this->insertConstraint(this->numConstraints(), b);
 }
