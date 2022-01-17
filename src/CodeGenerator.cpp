@@ -8,6 +8,7 @@
 #include "symengine/matrix.h"
 #include "symengine/basic.h"
 #include "symengine/symbol.h"
+#include <symengine/subs.h>
 
 #include "OrderedSet.h"
 #include "SymbolicEquality.h"
@@ -19,6 +20,58 @@ using SymEngine::RCP;
 using SymEngine::Basic;
 using SymEngine::Symbol;
 
+std::string CodeGenerator::generateDenseMatrixCode(const SymEngine::DenseMatrix& mat,
+                          const MapBasicString& variableRepr,
+                          const MapBasicString& parameterRepr,
+                          const std::string& matrixName) {
+    // Verify that each variable  in the matrix has a representation
+    // Verify that each parameter in the matrix has a representation
+    for (size_t i = 0; i < mat.nrows(); i++) {
+        for (size_t j = 0; j < mat.ncols(); j++) {
+            UnorderedSetSymbol variables = getVariables(mat.get(i, j));
+            UnorderedSetSymbol parameters = getParameters(mat.get(i, j));
+
+            for (auto variable : variables) {
+                if (variableRepr.count(variable) != 1) {
+                    throw std::runtime_error(
+                            "A representation for a variable was not found");
+                }
+            }
+            for (auto parameter : parameters) {
+                if (parameterRepr.count(parameter) != 1) {
+                    throw std::runtime_error(
+                            "A representation for a parameter was not found");
+                }
+            }
+        }
+    }
+
+    // Now that we have checked, we can throw them all together
+    MapBasicString symbolsMap;
+    symbolsMap.insert(variableRepr.begin(), variableRepr.end());
+    symbolsMap.insert(parameterRepr.begin(), parameterRepr.end());
+
+    // Construct the map of symbols to replace
+    SymEngine::map_basic_basic symbolsRepMap;
+    MapBasicString::iterator it;
+    for (it = symbolsMap.begin(); it != symbolsMap.end(); it++) {
+        symbolsRepMap[it->first] = SymEngine::symbol(it->second);
+    }
+
+    std::stringstream ss;
+
+    int count = 0;
+    for (size_t col = 0; col < mat.ncols(); col++) {
+        for (size_t row = 0; row < mat.nrows(); row++) {
+            RCP<const Basic> replaced = SymEngine::expand(
+                    SymEngine::xreplace(mat.get(row, col), symbolsRepMap));
+            ss << matrixName << "[" << std::to_string(count) << "] = " << SymEngine::ccode(*replaced) << ";" << std::endl;
+            count += 1;
+        }
+    }
+
+    return ss.str();
+}
 
 std::pair<std::string, std::string> CodeGenerator::generateSymbolicEqualityCode(
         const SymbolicEqualityConstraints& symbolicConstraints,
@@ -66,7 +119,7 @@ std::pair<std::string, std::string> CodeGenerator::generateSymbolicEqualityCode(
     ssMat << "void " << matrixFunctionName << "(const double* param, double* out) {" << std::endl;
 
     // The actual matrix construction code
-    ssMat << generateCCode(mat, variableRepr, parameterRepr, "out");
+    ssMat << CodeGenerator::generateDenseMatrixCode(mat, variableRepr, parameterRepr, "out");
 
     ssMat << "}" << std::endl;
 
@@ -77,7 +130,7 @@ std::pair<std::string, std::string> CodeGenerator::generateSymbolicEqualityCode(
     ssVec << "void " << vectorFunctionName << "(const double* param, double* out) {" << std::endl;
 
     // The actual matrix construction code
-    ssVec << generateCCode(vec, variableRepr, parameterRepr, "out");
+    ssVec << CodeGenerator::generateDenseMatrixCode(vec, variableRepr, parameterRepr, "out");
 
     ssVec << "}" << std::endl;
 

@@ -93,19 +93,6 @@ class SymbolicEqualityConstraints {
     std::pair<SymEngine::DenseMatrix, SymEngine::DenseMatrix>
     convertToLinearSystem(const OrderedSet& variableOrdering) const;
 
-    /**
-     * @brief Generate a string with the C++ source code for a function that
-     * returns an eigen matrix representing the matrix component of the
-     * equality constraints.
-     *
-     * @param variableOrdering The variable ordering to use for the constraints
-     * @param parameterOrdering
-     * @param functionName
-     */
-    std::string generateMatrixFunctionString(
-            const OrderedSet& variableOrdering,
-            const OrderedSet& parameterOrdering,
-            const std::string& functionName) const;
 };
 
 }  // namespace cppmpc

@@ -56,23 +56,6 @@ const RCP<const Basic>& echo(const RCP<const Basic>& basic);
  */
 void expandAll(SymEngine::DenseMatrix& mat);
 
-/**
- * @brief Generate C code that constructs an eigen matrix equivalent to the
- * passed symbolic matrix, using the given strings as representations for the
- * variables and parameters.
- *
- * The matrix elements are set in columns major order.
- *
- * @param mat The symbolic mat the matrix eigne matrix is based on.
- * @param variableRepr A map of variables to symbols.
- * @param parameterRepr A map of parameters to symbols.
- * @param matrixName The name of the matrix variable in the generated code.
- */
-std::string generateCCode(const SymEngine::DenseMatrix& mat,
-                          const MapBasicString& variableRepr,
-                          const MapBasicString& parameterRepr,
-                          const std::string& matrixName);
-
 }  // namespace cppmpc
 
 #endif  // INCLUDE_SYMENGINEUTILITIES_H_
