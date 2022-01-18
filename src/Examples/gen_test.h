@@ -1,3 +1,4 @@
+// Copyright 2021 Ian Ruh
 #ifndef GEN_TEST_H
 #define GEN_TEST_H
 #include <Eigen/Dense>

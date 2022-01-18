@@ -1,11 +1,12 @@
+// Copyright 2021 Ian Ruh
 #ifndef INCLUDE_FASTMPCFUNCTIONPOINTEROBJECTIVE_H_
 #define INCLUDE_FASTMPCFUNCTIONPOINTEROBJECTIVE_H_
 
-#include "FastMPC.h"
-#include "Util.h"
 #include <Eigen/Dense>
 #include <optional>
 #include <string>
+#include "FastMPC.h"
+#include "Util.h"
 
 namespace cppmpc {
 
@@ -21,8 +22,8 @@ namespace FastMPC {
  * function should calculate, and refer to the set* functions in this class
  * for the semantics of accessing and returning the values/vectors/matrices.
  */
-class FunctionPointerObjective: public Objective {
- private:
+class FunctionPointerObjective : public Objective {
+ protected:
     // Internal storage for the number of variables
     int _numVariables;
     // Internal storage for the number of inequality constraints
@@ -36,16 +37,23 @@ class FunctionPointerObjective: public Objective {
 
  public:
     // Types of the function pointers being used
-    typedef void (*ValueFunction)(const double* state, const double* param, double* out);
-    typedef void (*GradientFunction)(const double* state, const double* param, double* out);
-    typedef void (*HessianFunction)(const double* state, const double* paramm, double* out);
+    typedef void (*ValueFunction)(const double* state, const double* param,
+                                  double* out);
+    typedef void (*GradientFunction)(const double* state, const double* param,
+                                     double* out);
+    typedef void (*HessianFunction)(const double* state, const double* paramm,
+                                    double* out);
 
     typedef void (*EqualityMatrixFunction)(const double* param, double* out);
     typedef void (*EqualityVectorFunction)(const double* param, double* out);
 
-    typedef void (*InequalityValueFunction)(const double* state, const double* param, double* out);
-    typedef void (*InequalityGradientFunction)(const double* state, const double* param, double* out);
-    typedef void (*InequalityHessianFunction)(const double* state, const double* param, double* out);
+    typedef void (*InequalityValueFunction)(const double* state,
+                                            const double* param, double* out);
+    typedef void (*InequalityGradientFunction)(const double* state,
+                                               const double* param,
+                                               double* out);
+    typedef void (*InequalityHessianFunction)(const double* state,
+                                              const double* param, double* out);
 
  private:
     /**
@@ -56,46 +64,55 @@ class FunctionPointerObjective: public Objective {
         static void equalityMatrixFunction(const double* param, double* out);
         static void equalityVectorFunction(const double* param, double* out);
 
-        static void inequalityValueFunction(const double* state, const double* param, double* out);
-        static void inequalityGradientFunction(const double* state, const double* param, double* out);
-        static void inequalityHessianFunction(const double* state, const double* param, double* out);
+        static void inequalityValueFunction(const double* state,
+                                            const double* param, double* out);
+        static void inequalityGradientFunction(const double* state,
+                                               const double* param,
+                                               double* out);
+        static void inequalityHessianFunction(const double* state,
+                                              const double* param, double* out);
     } DefaultFunctions;
-    
+
     //============= Function pointer storage =============
     ValueFunction valueFunction = nullptr;
     GradientFunction gradientFunction = nullptr;
     HessianFunction hessianFunction = nullptr;
 
-    EqualityMatrixFunction equalityMatrixFunction = &DefaultFunctions::equalityMatrixFunction;
-    EqualityVectorFunction equalityVectorFunction = &DefaultFunctions::equalityVectorFunction;
+    EqualityMatrixFunction equalityMatrixFunction =
+            &DefaultFunctions::equalityMatrixFunction;
+    EqualityVectorFunction equalityVectorFunction =
+            &DefaultFunctions::equalityVectorFunction;
 
-    InequalityValueFunction inequalityValueFunction = &DefaultFunctions::inequalityValueFunction;
-    InequalityGradientFunction inequalityGradientFunction = &DefaultFunctions::inequalityGradientFunction;
-    InequalityHessianFunction inequalityHessianFunction = &DefaultFunctions::inequalityHessianFunction;
+    InequalityValueFunction inequalityValueFunction =
+            &DefaultFunctions::inequalityValueFunction;
+    InequalityGradientFunction inequalityGradientFunction =
+            &DefaultFunctions::inequalityGradientFunction;
+    InequalityHessianFunction inequalityHessianFunction =
+            &DefaultFunctions::inequalityHessianFunction;
     //====================================================
-    
+
+ protected:
     /**
      * @brief Calls the parent validate function, but also checks that none of
      * the function pointers are null (before calling the parent).
      */
     std::optional<std::string> validate() const override;
-    
- public:
-
-    FunctionPointerObjective(
-            int numVariables,
-            int numInequalityConstraints,
-            int numEqualityConstraints,
-            int numParameters);
-
-    int numParameters() const { return this->_numParameters; }
-    void setParameters(Eigen::VectorXd parameters);
 
  public:
+    FunctionPointerObjective(int numVariables, int numInequalityConstraints,
+                             int numEqualityConstraints, int numParameters);
 
+    virtual int numParameters() const { return this->_numParameters; }
+    virtual void setParameters(Eigen::VectorXd parameters);
+
+ public:
     int numVariables() const override { return this->_numVariables; }
-    int numInequalityConstraints() const override { return this->_numInequalityConstraints; }
-    int numEqualityConstraints() const override { return this->_numEqualityConstraints; }
+    int numInequalityConstraints() const override {
+        return this->_numInequalityConstraints;
+    }
+    int numEqualityConstraints() const override {
+        return this->_numEqualityConstraints;
+    }
 
     double value(const Eigen::VectorXd& state) const override;
     /**
@@ -147,7 +164,8 @@ class FunctionPointerObjective: public Objective {
      */
     void setHessianFunction(HessianFunction functionPtr);
 
-    std::optional<const Eigen::MatrixXd> equalityConstraintMatrix() const override;
+    std::optional<const Eigen::MatrixXd> equalityConstraintMatrix()
+            const override;
     /**
      * @brief Set the function pointer for the equality matrix function.
      *
@@ -163,7 +181,8 @@ class FunctionPointerObjective: public Objective {
      */
     void setEqualityMatrixFunction(EqualityMatrixFunction functionPtr);
 
-    std::optional<const Eigen::VectorXd> equalityConstraintVector() const override;
+    std::optional<const Eigen::VectorXd> equalityConstraintVector()
+            const override;
     /**
      * @brief Set the function pointer for the equality vector function.
      *
@@ -172,17 +191,19 @@ class FunctionPointerObjective: public Objective {
      * The out pointer will point to an array of doubles with the same length
      * as the number of equality constraints as reported by
      * numEqualityConstraints().
-     * 
+     *
      * This EqualityVectorFunction will not be called if the number of
      * equality constraints is 0.
      */
     void setEqualityVectorFunction(EqualityVectorFunction functionPtr);
 
-    double inequalityConstraintsValue(const Eigen::VectorXd& state) const override;
+    double inequalityConstraintsValue(
+            const Eigen::VectorXd& state) const override;
     /**
      * @brief Set the function pointer for the inequality value function.
      *
-     * @param functionPtr The function pointer for the inequality value function.
+     * @param functionPtr The function pointer for the inequality value
+     * function.
      *
      * The inequality value function should expect state and param to be
      * pointers to arrays of doubles, with the length reported by
@@ -197,15 +218,17 @@ class FunctionPointerObjective: public Objective {
      */
     void setInequalityValueFunction(InequalityValueFunction functionPtr);
 
-    const Eigen::VectorXd inequalityConstraintsGradient(const Eigen::VectorXd& state) const override;
-    void  setInequalityGradientFunction(InequalityGradientFunction functionPtr);
+    const Eigen::VectorXd inequalityConstraintsGradient(
+            const Eigen::VectorXd& state) const override;
+    void setInequalityGradientFunction(InequalityGradientFunction functionPtr);
 
-    const Eigen::MatrixXd inequalityConstraintsHessian(const Eigen::VectorXd& state) const override;
+    const Eigen::MatrixXd inequalityConstraintsHessian(
+            const Eigen::VectorXd& state) const override;
     void setInequalityHessianFunction(InequalityHessianFunction funcionPtr);
 };
 
-} // namespace FastMPC 
+}  // namespace FastMPC
 
-} // namespace cppmpc
+}  // namespace cppmpc
 
-#endif // INCLUDE_FASTMPCFUNCTIONPOINTEROBJECTIVE_H_
+#endif  // INCLUDE_FASTMPCFUNCTIONPOINTEROBJECTIVE_H_

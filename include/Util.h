@@ -1,3 +1,4 @@
+// Copyright 2021 Ian Ruh
 #ifndef INCLUDE_UTIL_H_
 #define INCLUDE_UTIL_H_
 #include <Eigen/Dense>
@@ -17,5 +18,6 @@ inline Eigen::IOFormat FlatFmt(4, 0, ", ", ";", "", "", "[", "]");
 #endif  // DEBUG
 
 #define CPP_COMPILER_PATH "clang"
+#define RUNTIME_COMPILER_FLAGS ""
 
 #endif  // INCLUDE_UTIL_H_

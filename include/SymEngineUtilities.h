@@ -32,6 +32,8 @@ typedef std::map<RCP<const Basic>, std::string, SymEngine::RCPBasicKeyLess>
  * @param name The name of the variable.
  */
 RCP<const Symbol> variable(const std::string& name);
+std::vector<RCP<const Symbol>> variableVector(const std::string& baseName,
+                                              size_t num);
 
 /**
  * @brief Create a symbol with the `$p_` prefix indicating it is not an active
@@ -40,6 +42,8 @@ RCP<const Symbol> variable(const std::string& name);
  * @param name The name of the parameter.
  */
 RCP<const Symbol> parameter(const std::string& name);
+std::vector<RCP<const Symbol>> parameterVector(const std::string& baseName,
+                                               size_t num);
 
 /**
  * @brief Get the gradient of the basic using the given variable ordering.
@@ -103,6 +107,10 @@ const RCP<const Basic>& echo(const RCP<const Basic>& basic);
  * @param mat The matrix to expand all elememnts in.
  */
 void expandAll(SymEngine::DenseMatrix& mat);
+
+//============== Convenience Operators/Functions ================
+
+RCP<const Basic> sum(const std::vector<RCP<const Symbol>>& vec);
 
 }  // namespace cppmpc
 

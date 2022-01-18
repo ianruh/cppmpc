@@ -7,8 +7,8 @@
 #include <optional>
 
 #include "FastMPC.h"
-#include "Util.h"
 #include "FastMPCFunctionPointerObjective.h"
+#include "Util.h"
 
 using namespace cppmpc;
 
@@ -29,75 +29,61 @@ using namespace cppmpc;
  *
  */
 //=============================================================================
-void valueFunction(
-        const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
+void valueFunction(const double* state, [[maybe_unused]] const double* param,
+                   double* out) {
     *out = state[0] * state[0] + state[1] * state[1];
 }
 
-void gradientFunction(
-        const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
-    out[0] = 2*state[0];
-    out[1] = 2*state[1];
+void gradientFunction(const double* state, [[maybe_unused]] const double* param,
+                      double* out) {
+    out[0] = 2 * state[0];
+    out[1] = 2 * state[1];
 }
 
-
-void hessianFunction(
-        [[maybe_unused]] const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
+void hessianFunction([[maybe_unused]] const double* state,
+                     [[maybe_unused]] const double* param, double* out) {
     // The output matrix is column major
-    out[0] = 2.0; // (0,0)
-    out[1] = 0.0; // (1,0)
-    out[2] = 0.0; // (0,1)
-    out[3] = 2.0; // (1,1)
+    out[0] = 2.0;  // (0,0)
+    out[1] = 0.0;  // (1,0)
+    out[2] = 0.0;  // (0,1)
+    out[3] = 2.0;  // (1,1)
 }
 
-void equalityMatrixFunction(
-        [[maybe_unused]] const double* param,
-        double* out) {
+void equalityMatrixFunction([[maybe_unused]] const double* param, double* out) {
     out[0] = 1.0;
     out[1] = 0.0;
 }
 
-void equalityVectorFunction(
-        [[maybe_unused]] const double* param,
-        double* out) {
+void equalityVectorFunction([[maybe_unused]] const double* param, double* out) {
     out[0] = param[0];
 }
 
-void inequalityValueFunction(
-        const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
+void inequalityValueFunction(const double* state,
+                             [[maybe_unused]] const double* param,
+                             double* out) {
     *out = -1 * std::log((state[1] - 2.0));
 }
 
-void inequalityGradientFunction(
-        const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
+void inequalityGradientFunction(const double* state,
+                                [[maybe_unused]] const double* param,
+                                double* out) {
     out[0] = 0.0;
     out[1] = -1.0 / (state[1] - 2.0);
 }
 
-void inequalityHessianFunction(
-        const double* state,
-        [[maybe_unused]] const double* param,
-        double* out) {
-    out[0] = 0.0; // (0,0)
-    out[1] = 0.0; // (1,0)
-    out[2] = 0.0; // (0,1)
-    out[3] = 1.0 / std::pow((state[1] - 2.0), 2); // (1,1)
+void inequalityHessianFunction(const double* state,
+                               [[maybe_unused]] const double* param,
+                               double* out) {
+    out[0] = 0.0;                                  // (0,0)
+    out[1] = 0.0;                                  // (1,0)
+    out[2] = 0.0;                                  // (0,1)
+    out[3] = 1.0 / std::pow((state[1] - 2.0), 2);  // (1,1)
 }
 //=============================================================================
 
 TEST(FastMPCTests, FunctionPointerObjective) {
-    FastMPC::FunctionPointerObjective objective = FastMPC::FunctionPointerObjective(
-            2, 1, 1, 1);
+    FastMPC::FunctionPointerObjective objective =
+            FastMPC::FunctionPointerObjective(2, 1, 1, 1);
 
     objective.setValueFunction(&valueFunction);
     objective.setGradientFunction(&gradientFunction);

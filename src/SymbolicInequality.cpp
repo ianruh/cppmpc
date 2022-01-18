@@ -1,9 +1,13 @@
 // Copyright 2021 Ian Ruh
 #include "SymbolicInequality.h"
 
+#include <symengine/add.h>
 #include <symengine/basic.h>
+#include <symengine/constants.h>
 #include <symengine/expression.h>
+#include <symengine/functions.h>
 #include <symengine/matrix.h>
+#include <symengine/mul.h>
 #include <symengine/polys/basic_conversions.h>
 #include <symengine/sets.h>
 #include <symengine/subs.h>
@@ -22,7 +26,8 @@ using SymEngine::Basic;
 using SymEngine::RCP;
 using SymEngine::Symbol;
 
-void SymbolicInequalityConstraints::appendNormalConstraint(const RCP<const Basic>& b) {
+void SymbolicInequalityConstraints::appendNormalConstraint(
+        const RCP<const Basic>& b) {
     this->insertNormalConstraint(this->numConstraints(), b);
 }
 
@@ -45,23 +50,23 @@ const RCP<const Basic>& SymbolicInequalityConstraints::getConstraint(
     return this->constraints.at(index);
 }
 
-void SymbolicInequalityConstraints::insertNormalConstraint(size_t index,
-                                                   const RCP<const Basic>& b) {
+void SymbolicInequalityConstraints::insertNormalConstraint(
+        size_t index, const RCP<const Basic>& b) {
     this->constraints.insert(this->constraints.begin() + index, b);
 }
 
 void SymbolicInequalityConstraints::insertLessThan(size_t index,
                                                    const Expression& left,
                                                    const Expression& right) {
-    this->insertNormalConstraint(index,
-                           SymEngine::sub(left.get_basic(), right.get_basic()));
+    this->insertNormalConstraint(
+            index, SymEngine::sub(left.get_basic(), right.get_basic()));
 }
 
 void SymbolicInequalityConstraints::insertGreaterThan(size_t index,
-                                                   const Expression& left,
-                                                   const Expression& right) {
-    this->insertNormalConstraint(index,
-                           SymEngine::sub(right.get_basic(), left.get_basic()));
+                                                      const Expression& left,
+                                                      const Expression& right) {
+    this->insertNormalConstraint(
+            index, SymEngine::sub(right.get_basic(), left.get_basic()));
 }
 
 UnorderedSetSymbol SymbolicInequalityConstraints::getSymbols() const {
@@ -86,6 +91,26 @@ UnorderedSetSymbol SymbolicInequalityConstraints::getParameters() const {
         util_union(parameters, cppmpc::getParameters(b));
     }
     return parameters;
+}
+
+RCP<const Basic> SymbolicInequalityConstraints::symbolicBarrierValue() const {
+    RCP<const Basic> runningSum = SymEngine::zero;
+    for (size_t i = 0; i < this->numConstraints(); i++) {
+        RCP<const Basic> withBarrier = SymEngine::neg(
+                SymEngine::log(SymEngine::neg(this->getConstraint(i))));
+        runningSum = SymEngine::add(runningSum, withBarrier);
+    }
+    return runningSum;
+}
+
+SymEngine::DenseMatrix SymbolicInequalityConstraints::symbolicBarrierGradient(
+        const OrderedSet& variableOrdering) const {
+    return gradient(this->symbolicBarrierValue(), variableOrdering);
+}
+
+SymEngine::DenseMatrix SymbolicInequalityConstraints::symbolicBarrierHessian(
+        const OrderedSet& variableOrdering) const {
+    return hessian(this->symbolicBarrierValue(), variableOrdering);
 }
 
 }  // namespace cppmpc

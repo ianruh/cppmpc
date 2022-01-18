@@ -92,7 +92,6 @@ class SymbolicEqualityConstraints {
      */
     std::pair<SymEngine::DenseMatrix, SymEngine::DenseMatrix>
     convertToLinearSystem(const OrderedSet& variableOrdering) const;
-
 };
 
 }  // namespace cppmpc

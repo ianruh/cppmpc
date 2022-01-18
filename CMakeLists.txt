@@ -12,9 +12,10 @@ else()
 endif()
 
 # SWIG generates some code that this warning isn't happy with
-add_compile_options(-Wno-missing-field-initializers)
+#add_compile_options(-Wno-missing-field-initializers)
 # Make SWIG happy (something to do with dynamic linking)
-add_compile_options(-fPIC)
+#add_compile_options(-fPIC)
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-03")
 
 # Set debug flags. These don't enable the debug flags, they just tell cmake
 # which flags to set in debug mode.

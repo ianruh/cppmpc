@@ -1,19 +1,23 @@
 // Copyright 2021 Ian Ruh
 #include "SymEngineUtilities.h"
 
+#include <symengine/add.h>
 #include <symengine/basic.h>
+#include <symengine/derivative.h>
 #include <symengine/dict.h>
 #include <symengine/matrix.h>
+#include <symengine/mul.h>
+#include <symengine/pow.h>
 #include <symengine/printers.h>
 #include <symengine/subs.h>
 #include <symengine/symbol.h>
-#include <symengine/derivative.h>
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "GetSymbolsVisitor.h"
 #include "OrderedSet.h"
@@ -28,15 +32,32 @@ RCP<const Symbol> variable(const std::string& name) {
     return SymEngine::symbol("$v_" + name);
 }
 
+std::vector<RCP<const Symbol>> variableVector(const std::string& baseName,
+                                              size_t num) {
+    std::vector<RCP<const Symbol>> vec(num);
+    for (size_t i = 0; i < num; i++) {
+        vec.push_back(variable(baseName + std::to_string(i)));
+    }
+    return vec;
+}
+
 RCP<const Symbol> parameter(const std::string& name) {
     return SymEngine::symbol("$p_" + name);
 }
 
+std::vector<RCP<const Symbol>> parameterVector(const std::string& baseName,
+                                               size_t num) {
+    std::vector<RCP<const Symbol>> vec(num);
+    for (size_t i = 0; i < num; i++) {
+        vec.push_back(parameter(baseName + std::to_string(i)));
+    }
+    return vec;
+}
+
 SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
                                 const OrderedSet& variableOrdering) {
-
-    SymEngine::DenseMatrix grad(variableOrdering.size(),1);
-    for(size_t i = 0; i < variableOrdering.size(); i++) {
+    SymEngine::DenseMatrix grad(variableOrdering.size(), 1);
+    for (size_t i = 0; i < variableOrdering.size(); i++) {
         RCP<const Symbol> symbol = variableOrdering.at(i);
         grad.set(i, 0, SymEngine::diff(basic, symbol));
     }
@@ -45,12 +66,12 @@ SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
 }
 
 SymEngine::DenseMatrix hessian(const RCP<const Basic>& basic,
-                                const OrderedSet& variableOrdering) {
+                               const OrderedSet& variableOrdering) {
+    SymEngine::DenseMatrix hess(variableOrdering.size(),
+                                variableOrdering.size());
 
-    SymEngine::DenseMatrix hess(variableOrdering.size(), variableOrdering.size());
-
-    for(size_t row = 0; row < variableOrdering.size(); row++) {
-        for(size_t col = 0; col < variableOrdering.size(); col++) {
+    for (size_t row = 0; row < variableOrdering.size(); row++) {
+        for (size_t col = 0; col < variableOrdering.size(); col++) {
             RCP<const Symbol> symbol_row = variableOrdering.at(row);
             RCP<const Symbol> symbol_col = variableOrdering.at(col);
             RCP<const Basic> d_row = SymEngine::diff(basic, symbol_row);
@@ -131,5 +152,23 @@ void util_union(UnorderedSetSymbol& base, const UnorderedSetSymbol& other) {
 }
 
 const RCP<const Basic>& echo(const RCP<const Basic>& basic) { return basic; }
+
+//============== Convenience Operators/Functions ================
+
+RCP<const Basic> sum(const std::vector<RCP<const Symbol>>& vec) {
+    RCP<const Basic> base = SymEngine::zero;
+    for (RCP<const Symbol> symbol : vec) {
+        base = SymEngine::add(symbol, base);
+    }
+    return base;
+}
+
+RCP<const Basic> norm(const std::vector<RCP<const Symbol>>& vec) {
+    RCP<const Basic> base = SymEngine::zero;
+    for (RCP<const Symbol> symbol : vec) {
+        base = SymEngine::add(SymEngine::mul(symbol, symbol), base);
+    }
+    return SymEngine::sqrt(base);
+}
 
 }  // namespace cppmpc

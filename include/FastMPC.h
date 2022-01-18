@@ -1,3 +1,4 @@
+// Copyright 2021 Ian Ruh
 #ifndef INCLUDE_FASTMPC_H_
 #define INCLUDE_FASTMPC_H_
 

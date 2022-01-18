@@ -1,18 +1,18 @@
 // Copyright 2021 Ian Ruh
 #include <gtest/gtest.h>
 #include <symengine/basic.h>
-#include <symengine/symbol.h>
-#include <symengine/matrix.h>
 #include <symengine/expression.h>
+#include <symengine/matrix.h>
+#include <symengine/symbol.h>
 #include <iostream>
 
 #include "OrderedSet.h"
 #include "SymEngineUtilities.h"
 
 using SymEngine::Basic;
+using SymEngine::Expression;
 using SymEngine::RCP;
 using SymEngine::Symbol;
-using SymEngine::Expression;
 
 TEST(SymEngineUtilityTests, Gradient) {
     RCP<const Symbol> xb = SymEngine::symbol("x");
@@ -27,15 +27,14 @@ TEST(SymEngineUtilityTests, Gradient) {
     set.append(xb);
     set.append(yb);
     set.append(zb);
-    
-    Expression exp = x*x*x + 2*x*y + z*z*y;
-    
-    SymEngine::DenseMatrix grad = cppmpc::gradient(exp.get_basic(),
-                                                      set);
 
-    EXPECT_TRUE((3*x*x + 2*y).get_basic()->compare(*grad.get(0,0)) == 0);
-    EXPECT_TRUE((2*x + z*z).get_basic()->compare(*grad.get(1,0)) == 0);
-    EXPECT_TRUE((2*z*y).get_basic()->compare(*grad.get(2,0)) == 0);
+    Expression exp = x * x * x + 2 * x * y + z * z * y;
+
+    SymEngine::DenseMatrix grad = cppmpc::gradient(exp.get_basic(), set);
+
+    EXPECT_TRUE((3 * x * x + 2 * y).get_basic()->compare(*grad.get(0, 0)) == 0);
+    EXPECT_TRUE((2 * x + z * z).get_basic()->compare(*grad.get(1, 0)) == 0);
+    EXPECT_TRUE((2 * z * y).get_basic()->compare(*grad.get(2, 0)) == 0);
 }
 
 TEST(SymEngineUtilityTests, Hessian) {
@@ -51,28 +50,27 @@ TEST(SymEngineUtilityTests, Hessian) {
     set.append(xb);
     set.append(yb);
     set.append(zb);
-    
-    Expression exp = x*x*x + 2*x*y + z*z*y;
-    
-    SymEngine::DenseMatrix hess = cppmpc::hessian(exp.get_basic(),
-                                                      set);
-    
+
+    Expression exp = x * x * x + 2 * x * y + z * z * y;
+
+    SymEngine::DenseMatrix hess = cppmpc::hessian(exp.get_basic(), set);
+
     std::cout << hess.__str__() << std::endl;
     // Row 1
     // Derivative wrt x: 3*x*x + 2*y
-    EXPECT_TRUE((6*x).get_basic()->compare(*hess.get(0,0)) == 0);
-    EXPECT_TRUE(Expression(2).get_basic()->compare(*hess.get(0,1)) == 0);
-    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(0,2)) == 0);
+    EXPECT_TRUE((6 * x).get_basic()->compare(*hess.get(0, 0)) == 0);
+    EXPECT_TRUE(Expression(2).get_basic()->compare(*hess.get(0, 1)) == 0);
+    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(0, 2)) == 0);
 
     // Row 2
     // Derivative wrt y: 2*x + z*z
-    EXPECT_TRUE(Expression(2).get_basic()->compare(*hess.get(1,0)) == 0);
-    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(1,1)) == 0);
-    EXPECT_TRUE((2*z).get_basic()->compare(*hess.get(1,2)) == 0);
+    EXPECT_TRUE(Expression(2).get_basic()->compare(*hess.get(1, 0)) == 0);
+    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(1, 1)) == 0);
+    EXPECT_TRUE((2 * z).get_basic()->compare(*hess.get(1, 2)) == 0);
 
     // Row 3
     // Derivative wrt z: 2*z*y
-    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(2,0)) == 0);
-    EXPECT_TRUE(Expression(2*z).get_basic()->compare(*hess.get(2,1)) == 0);
-    EXPECT_TRUE(Expression(2*y).get_basic()->compare(*hess.get(2,2)) == 0);
+    EXPECT_TRUE(Expression(0).get_basic()->compare(*hess.get(2, 0)) == 0);
+    EXPECT_TRUE(Expression(2 * z).get_basic()->compare(*hess.get(2, 1)) == 0);
+    EXPECT_TRUE(Expression(2 * y).get_basic()->compare(*hess.get(2, 2)) == 0);
 }

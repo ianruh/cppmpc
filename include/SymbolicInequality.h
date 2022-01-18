@@ -67,7 +67,7 @@ class SymbolicInequalityConstraints {
     const RCP<const Basic>& getConstraint(size_t index) const;
 
     /**
-     * @brief Insert an inequality constraint at the given index. 
+     * @brief Insert an inequality constraint at the given index.
      *
      * The node should be in normal form.
      *
@@ -85,7 +85,7 @@ class SymbolicInequalityConstraints {
      * @param right Expression for the right side of the less than.
      */
     void insertLessThan(size_t index, const Expression& left,
-                          const Expression& right);
+                        const Expression& right);
 
     /**
      * @brief Convenience function to insert an inequality constraint based off
@@ -96,7 +96,7 @@ class SymbolicInequalityConstraints {
      * @param right Expression for the right side of the greater than.
      */
     void insertGreaterThan(size_t index, const Expression& left,
-                          const Expression& right);
+                           const Expression& right);
 
     /**
      * @brief The number of inequality constraints.
@@ -108,6 +108,14 @@ class SymbolicInequalityConstraints {
     UnorderedSetSymbol getVariables() const;
 
     UnorderedSetSymbol getParameters() const;
+
+    RCP<const Basic> symbolicBarrierValue() const;
+
+    SymEngine::DenseMatrix symbolicBarrierGradient(
+            const OrderedSet& variableOrdering) const;
+
+    SymEngine::DenseMatrix symbolicBarrierHessian(
+            const OrderedSet& variableOrdering) const;
 };
 
 }  // namespace cppmpc
