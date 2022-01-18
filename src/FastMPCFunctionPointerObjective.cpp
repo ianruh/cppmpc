@@ -63,10 +63,12 @@ std::optional<std::string> FunctionPointerObjective::validate() const {
 
     // Check that if we have parameters, then the parameters vector exists and
     // is the right size.
-    if (this->numParameters() > 0 && !this->_parameters &&
-        this->_parameters->rows() == this->numParameters()) {
-        return "Number of parameters does not match the parameters vector "
-               "size, or the vector has not been set";
+    if (this->numParameters() > 0) {
+        if(!this->_parameters ||
+            this->_parameters->rows() != this->numParameters()) {
+            return "Number of parameters does not match the parameters vector "
+                    "size, or the vector has not been set";
+        }
     }
 
     // Run the original validation checks now.

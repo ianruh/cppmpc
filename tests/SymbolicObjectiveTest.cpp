@@ -30,13 +30,18 @@ TEST(SymbolicObjectiveTests, QuadraticSystem) {
 
     // Add equality constraints
     objective.equalityConstraints.appendConstraint(x, 3.0);
-    objective.inequalityConstraints.appendGreaterThan(y, 2.0);
+    objective.inequalityConstraints.appendGreaterThan(y, a);
 
     // Set the objective
-    objective.setObjective(x * x + y * y);
+    objective.setObjective(x * x + y * y); 
 
     // Finalize
     objective.finalize(variableOrdering, parameterOrdering);
+
+    // Set the parameter
+    Eigen::VectorXd param(1);
+    param << 2.0;
+    objective.setParameters(param);
 
     // Create the solver
     cppmpc::FastMPC::Solver solver = cppmpc::FastMPC::Solver(objective);

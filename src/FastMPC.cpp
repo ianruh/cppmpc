@@ -158,14 +158,14 @@ std::optional<std::string> Objective::validate() const {
 }
 
 Solver::Solver(const Objective& objective) : objective(objective) {
-#ifdef NO_VALIDATE_OBJECTIVE
+#ifndef NO_VALIDATE_OBJECTIVE
     // Check the objective dimenions all agree
     std::optional<std::string> objectiveValidationMessage =
             this->objective.validate();
     if (objectiveValidationMessage) {
         throw std::runtime_error(*objectiveValidationMessage);
     }
-#endif  // VALIDATE_OBJECTIVE
+#endif  // NO_VALIDATE_OBJECTIVE
 }
 
 std::tuple<double, Eigen::VectorXd, Eigen::VectorXd> Solver::minimize(
