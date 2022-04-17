@@ -78,31 +78,31 @@ target_compile_options(pybind11 INTERFACE -Wno-deprecated-declarations)
 
 # cppmpc Library
 add_library(cppmpc
-    src/SymbolicObjective.cpp
-    src/SymEngineUtilities.cpp
-    src/GetSymbolsVisitor.cpp
-    src/SymbolicEquality.cpp
-    src/FastMPC.cpp
-    src/FastMPCFunctionPointerObjective.cpp
-    src/CodeGenerator.cpp
-    src/SymbolicInequality.cpp
-    include/SymbolicObjective.h
-    include/SymEngineUtilities.h
-    include/GetSymbolsVisitor.h
-    include/SymbolicEquality.h
-    include/OrderedSet.h
-    include/FastMPC.h
-    include/FastMPCFunctionPointerObjective.h
-    include/CodeGenerator.h
-    include/SymbolicInequality.h
+    cppmpc/SymbolicObjective.cpp
+    cppmpc/SymEngineUtilities.cpp
+    cppmpc/GetSymbolsVisitor.cpp
+    cppmpc/SymbolicEquality.cpp
+    cppmpc/FastMPC.cpp
+    cppmpc/FastMPCFunctionPointerObjective.cpp
+    cppmpc/CodeGenerator.cpp
+    cppmpc/SymbolicInequality.cpp
+    cppmpc/SymbolicObjective.h
+    cppmpc/SymEngineUtilities.h
+    cppmpc/GetSymbolsVisitor.h
+    cppmpc/SymbolicEquality.h
+    cppmpc/OrderedSet.h
+    cppmpc/FastMPC.h
+    cppmpc/FastMPCFunctionPointerObjective.h
+    cppmpc/CodeGenerator.h
+    cppmpc/SymbolicInequality.h
 )
-target_include_directories(cppmpc PUBLIC include/)
+target_include_directories(cppmpc PUBLIC cppmpc/)
 target_link_libraries(cppmpc symengine gmp Eigen3::Eigen ${CMAKE_DL_LIBS})
 target_compile_options(cppmpc PUBLIC -Wall -Wextra -Wpedantic -Werror)
 
 ######## Executables ########
 
-add_executable(CartPole src/Examples/CartPole.cpp)
+add_executable(CartPole cppmpc/Examples/CartPole.cpp)
 target_link_libraries(CartPole PRIVATE cppmpc symengine pybind11::embed)
 target_compile_options(CartPole PUBLIC -Wall -Wextra -Wpedantic -Werror)
 
