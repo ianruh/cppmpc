@@ -5,6 +5,7 @@
 #include <symengine/basic.h>
 #include <symengine/matrix.h>
 #include <symengine/symbol.h>
+#include <symengine/expression.h>
 
 #include <map>
 #include <string>
@@ -17,6 +18,7 @@ namespace cppmpc {
 using SymEngine::Basic;
 using SymEngine::RCP;
 using SymEngine::Symbol;
+using SymEngine::Expression;
 
 typedef std::unordered_set<SymEngine::RCP<const SymEngine::Symbol>,
                            SymEngine::RCPBasicHash, SymEngine::RCPBasicKeyEq>
@@ -44,6 +46,28 @@ std::vector<RCP<const Symbol>> variableVector(const std::string& baseName,
 RCP<const Symbol> parameter(const std::string& name);
 std::vector<RCP<const Symbol>> parameterVector(const std::string& baseName,
                                                size_t num);
+
+std::vector<SymEngine::Expression> toExpressions(const std::vector<RCP<const Symbol>>& rcpVec);
+
+/**
+ * @brief The SymEngine::series function implicitly only expands a series
+ * about 0, which isn't good enough for us. This does some substitutions
+ * to taylor expand the given basic about the given symbol at any location.
+ *
+ * @param original [TODO:description]
+ * @param variable [TODO:description]
+ * @param location [TODO:description]
+ * @param order [TODO:description]
+ */
+RCP<const Basic> taylorExpand(const RCP<const Basic>& original,
+                                         const RCP<const Symbol>& variable,
+                                         const RCP<const Basic>& location,
+                                         size_t order);
+
+RCP<const Basic> taylorExpand(const Expression& original,
+                              const Expression& variable,
+                              const Expression& location,
+                              size_t order);
 
 /**
  * @brief Get the gradient of the basic using the given variable ordering.
@@ -110,7 +134,15 @@ void expandAll(SymEngine::DenseMatrix& mat);
 
 //============== Convenience Operators/Functions ================
 
+// Need expression versions of all of these
 RCP<const Basic> sum(const std::vector<RCP<const Symbol>>& vec);
+RCP<const Basic> norm(const std::vector<RCP<const Symbol>>& vec);
+RCP<const Basic> squaredSum(const std::vector<RCP<const Symbol>>& vec);
+
+Expression sin(const Expression& arg);
+Expression cos(const Expression& arg);
+Expression tan(const Expression& arg);
+Expression pow(const Expression& base, const Expression& order);
 
 }  // namespace cppmpc
 

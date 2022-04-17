@@ -28,6 +28,10 @@ class SymbolicObjective : public FunctionPointerObjective {
 
     bool finalized = false;
 
+    // Stores the parameter ordering once the objective has been finalized.
+    // This is just to make it easier to set parameters.
+    std::optional<OrderedSet> parameterOrdering;
+
     // Function names
     const std::string valueFunctionName = "value";
     const std::string gradientFunctionName = "gradient";
@@ -60,11 +64,18 @@ class SymbolicObjective : public FunctionPointerObjective {
     /**
      * @brief Compile the objectives and set the function pointers.
      *
-     * @param variableOrdering [TODO:description]
-     * @param parameterOrdering [TODO:description]
+     * @param variableOrdering The variable ordering.
+     * @param parameterOrdering The parameter ordering.
      */
     void finalize(const OrderedSet& variableOrdering,
                   const OrderedSet& parameterOrdering);
+
+    /**
+     * @brief Get a reference to the given parameter.
+     *
+     * @param exp The parameter to get a reference to.
+     */
+    double& parameter(const SymEngine::Expression& exp);
 
     UnorderedSetSymbol getSymbols() const;
 

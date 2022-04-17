@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <optional>
 #include <string>
+#include <stdexcept>
 
 namespace cppmpc {
 
@@ -85,6 +86,11 @@ FunctionPointerObjective::FunctionPointerObjective(int numVariables,
           _numParameters(numParameters) {}
 
 void FunctionPointerObjective::setParameters(Eigen::VectorXd parameters) {
+#ifndef NO_VALIDATE_OBJECTIVE
+    if(parameters.rows() != this->numParameters()) {
+        throw std::runtime_error("Parameters vector is the wrong length.");
+    }
+#endif
     this->_parameters = parameters;
 }
 

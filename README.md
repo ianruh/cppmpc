@@ -1,7 +1,7 @@
 # CPP MPC
 
 **Setup**
-`mamba create -n cppmpc -c conda-forge cmake xeus-cling cling=0.8 eigen gmp gcc_linux-64`
+`mamba create -n cppmpc -c conda-forge cmake eigen gmp gcc_linux-64 pybind11`
 
 **Dev Dependencies**
 - fd

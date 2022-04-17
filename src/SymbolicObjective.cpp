@@ -136,6 +136,21 @@ void SymbolicObjective::finalize(const OrderedSet& variableOrdering,
     this->_numEqualityConstraints = this->numEqualityConstraints();
     this->_numInequalityConstraints = this->numInequalityConstraints();
     this->finalized = true;
+    this->parameterOrdering = parameterOrdering;
+}
+
+double& SymbolicObjective::parameter(const SymEngine::Expression& exp) {
+    if(!this->finalized || !this->parameterOrdering) {
+        throw std::runtime_error("Parameter ordering must be fixed.");
+    }
+
+    if(!this->_parameters) {
+        this->_parameters = Eigen::VectorXd::Zero(this->numParameters());
+    }
+
+    size_t index = this->parameterOrdering->indexOf(SymEngine::rcp_dynamic_cast<const SymEngine::Symbol>(exp.get_basic()));
+
+    return (*this->_parameters)(index);
 }
 
 UnorderedSetSymbol SymbolicObjective::getSymbols() const {

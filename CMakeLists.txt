@@ -49,8 +49,8 @@ FetchContent_MakeAvailable(googletest)
 ####### Eigen #######
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
-####### Cling #######
-#find_package (Cling REQUIRED NO_MODULE)
+####### pybind11 #######
+find_package(pybind11 REQUIRED)
 
 ################################# Targets #####################################
 
@@ -81,8 +81,8 @@ target_link_libraries(cppmpc symengine gmp Eigen3::Eigen ${CMAKE_DL_LIBS})
 
 ######## Executables ########
 
-add_executable(example1 src/Examples/example1.cpp)
-target_link_libraries(example1 PRIVATE cppmpc symengine)
+add_executable(CartPole src/Examples/CartPole.cpp)
+target_link_libraries(CartPole PRIVATE cppmpc symengine pybind11::embed)
 
 ######## Tests ########
 enable_testing()

@@ -10,24 +10,29 @@ ProgName=$(basename $0)
 CPP_EXTENSIONS="cpp|cc|cxx|hpp|h"
 SYMENGINE_REPO="https://github.com/symengine/symengine.git"
 SYMENGINE_COMMIT="5c47488c5d1df382d36959b0dad14916dd745f54"
+GYM_REPO="https://github.com/ianruh/gym.git"
 CC=clang
 CXX=clang++
+SYMEGINE_BUILD_TYPE=Release
 
 sub_help(){
     echo "Usage: $ProgName <subcommand> [options]\n"
     echo "Subcommands:"
-    echo "    build             Build the library"
-    echo "    build-debug       Build the library"
-    echo "    clean             Clean all build artifacts"
-    echo "    clean-all         Clean all build artifacts and delete build/"
-    echo "    cpplint           Lint all of the c++ code using cpplint"
-    echo "    copyright         Place the copyright at the top of all source files"
-    echo "    format            Format all code using flake8 and clang-format"
-    echo "    format-cpp        Format c/c++ code using clang-format"
-    echo "    todo              Search todos in the code"
-    echo "    test              Run all C++ and python tests"
-    echo "    install-kernel    Install the jupyter kernel"
-    echo "    bootstrap         Build the dependencies that need to be built from source"
+    echo "    build                 Build the library"
+    echo "    build-debug           Build the library"
+    echo "    clean                 Clean all build artifacts"
+    echo "    clean-all             Clean all build artifacts and delete build/"
+    echo "    cpplint               Lint all of the c++ code using cpplint"
+    echo "    copyright             Place the copyright at the top of all source files"
+    echo "    format                Format all code using flake8 and clang-format"
+    echo "    format-cpp            Format c/c++ code using clang-format"
+    echo "    todo                  Search todos in the code"
+    echo "    test                  Run all C++ and python tests"
+    echo "    install-kernel        Install the jupyter kernel"
+    echo "    bootstrap             Build the dependencies that need to be built from source"
+    echo "    bootstrap-debug       Build the dependencies that need to be built from source"
+    echo "                          in debug mode"
+    echo "    bootstrap-examples    Build the dependencies needed for the examples"
     echo ""
     echo "For help with each subcommand run:"
     echo "$ProgName <subcommand> -h|--help"
@@ -47,6 +52,11 @@ util_check_conda() {
         printf "${RED}\$CONDA_PREFIX environment variable not set. Do you need to activate the environment?${NC}\n"
         exit 1
     fi
+}
+
+sub_bootstrap-debug() {
+    SYMEGINE_BUILD_TYPE=Debug
+    sub_bootstrap
 }
 
 sub_bootstrap() {
@@ -95,6 +105,7 @@ sub_bootstrap() {
         -DBUILD_TESTS=OFF \
         -DBUILD_BENCHMARKS=OFF \
         -DBUILD_SHARED_LIBS=ON \
+        -D CMAKE_BUILD_TYPE=$SYMEGINE_BUILD_TYPE \
         ..
 
     make -j8
@@ -103,6 +114,29 @@ sub_bootstrap() {
     cd "$original_wd"
 }
 
+sub_bootstrap-examples() {
+    original_wd=$(pwd)
+    cd "$(git rev-parse --show-toplevel)"
+
+    util_check_conda
+    util_section_header "Installing OpenAI Gym"
+ 
+    # Make a third party directory is one doesn't exist
+    if ! [[ -d third_party/ ]]; then
+        mkdir third_party/
+    fi
+    cd third_party/
+    
+    # Delete gym if it is already here and re-clone it
+    if [[ -d gym/ ]]; then
+        rm -rf gym/
+    fi
+    git clone $GYM_REPO gym
+    cd gym/
+    python3 -m pip install -e .
+
+    cd "$original_wd"
+}
 
 sub_install-kernel() {
     original_wd=$(pwd)
