@@ -58,19 +58,19 @@ FetchContent_MakeAvailable(googletest)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 ####### pybind11 #######
-FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11
-    GIT_TAG        v2.2.3
-)
-FetchContent_MakeAvailable(pybind11)
-
-FetchContent_GetProperties(pybind11)
-if(NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-endif()
-target_compile_options(pybind11 INTERFACE -Wno-deprecated-declarations)
+#FetchContent_Declare(
+#    pybind11
+#    GIT_REPOSITORY https://github.com/pybind/pybind11
+#    GIT_TAG        v2.2.3
+#)
+#FetchContent_MakeAvailable(pybind11)
+#
+#FetchContent_GetProperties(pybind11)
+#if(NOT pybind11_POPULATED)
+#    FetchContent_Populate(pybind11)
+#    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+#endif()
+#target_compile_options(pybind11 INTERFACE -Wno-deprecated-declarations)
 
 ################################# Targets #####################################
 
@@ -102,9 +102,9 @@ target_compile_options(cppmpc PUBLIC -Wall -Wextra -Wpedantic -Werror)
 
 ######## Executables ########
 
-add_executable(CartPole cppmpc/Examples/CartPole.cpp)
-target_link_libraries(CartPole PRIVATE cppmpc symengine pybind11::embed)
-target_compile_options(CartPole PUBLIC -Wall -Wextra -Wpedantic -Werror)
+#add_executable(CartPole cppmpc/Examples/CartPole.cpp)
+#target_link_libraries(CartPole PRIVATE cppmpc symengine pybind11::embed)
+#target_compile_options(CartPole PUBLIC -Wall -Wextra -Wpedantic -Werror)
 
 ######## Tests ########
 enable_testing()
