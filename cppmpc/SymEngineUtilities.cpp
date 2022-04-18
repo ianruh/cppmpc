@@ -129,6 +129,22 @@ SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
     return grad;
 }
 
+SymEngine::DenseMatrix jacobian(const SymEngine::DenseMatrix& f,
+                                const OrderedSet& variableOrdering) {
+    SymEngine::DenseMatrix jacobian(
+            variableOrdering.size(),
+            variableOrdering.size());
+    // Rows first, then columns
+    for (size_t row = 0; row < variableOrdering.size(); row++) {
+        for(size_t col = 0; col < variableOrdering.size(); col++) {
+            RCP<const Symbol> symbol = variableOrdering.at(col);
+            jacobian.set(row, col, SymEngine::diff(f.get(row, 0), symbol));
+        }
+    }
+
+    return jacobian;
+}
+
 SymEngine::DenseMatrix hessian(const RCP<const Basic>& basic,
                                const OrderedSet& variableOrdering) {
     SymEngine::DenseMatrix hess(variableOrdering.size(),

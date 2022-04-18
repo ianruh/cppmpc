@@ -81,6 +81,17 @@ SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
                                 const OrderedSet& variableOrdering);
 
 /**
+ * @brief Get the jacobian of the vector valued functionn f.
+ *
+ * @param f A vector valued function.
+ * @param variableOrdering The variable ordering to use.
+ *
+ * @return The jacobian of the function f.
+ */
+SymEngine::DenseMatrix jacobian(const SymEngine::DenseMatrix& f,
+                                const OrderedSet& variableOrdering);
+
+/**
  * @brief Get the hessian of the basic using the given variable ordering.
  *
  * @param basic The basic.

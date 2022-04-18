@@ -92,7 +92,7 @@ sub_test() {
     util_check_conda
     util_section_header "Building"
     # Build first
-    sub_build-debug
+    sub_build
  
     # Stop if the build failed
     if [[ "$?" != "0" ]]; then
