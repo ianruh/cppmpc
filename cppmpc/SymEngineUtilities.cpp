@@ -132,10 +132,10 @@ SymEngine::DenseMatrix gradient(const RCP<const Basic>& basic,
 SymEngine::DenseMatrix jacobian(const SymEngine::DenseMatrix& f,
                                 const OrderedSet& variableOrdering) {
     SymEngine::DenseMatrix jacobian(
-            variableOrdering.size(),
+            f.nrows(),
             variableOrdering.size());
     // Rows first, then columns
-    for (size_t row = 0; row < variableOrdering.size(); row++) {
+    for (size_t row = 0; row < f.nrows(); row++) {
         for(size_t col = 0; col < variableOrdering.size(); col++) {
             RCP<const Symbol> symbol = variableOrdering.at(col);
             jacobian.set(row, col, SymEngine::diff(f.get(row, 0), symbol));
