@@ -6,6 +6,9 @@ the moment. Not all tests have been implemented, but the core solver works.
 In addition, the biggest improvement is runtime code generation and compilation
 for the objective given the symbolic representation of the problem.
 
+One example usage with respect to rendezvous and proximity operations can be
+found [here](https://github.com/ianruh/Rendezvous-Proximity).
+
 ## Getting Started
 
 Simply clone the repository, build, and run the tests. All dependencies except
