@@ -216,7 +216,7 @@ class Objective {
 };
 
 class Solver {
- prublic:
+ public:
     // TODO(ianruh): Get and set hyper parameters
     HyperParameters hyperParameters;
 
