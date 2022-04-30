@@ -216,10 +216,11 @@ class Objective {
 };
 
 class Solver {
- private:
+ prublic:
     // TODO(ianruh): Get and set hyper parameters
     HyperParameters hyperParameters;
 
+ private:
     const Objective& objective;
 
  public:

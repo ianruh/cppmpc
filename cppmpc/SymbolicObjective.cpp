@@ -104,6 +104,7 @@ void SymbolicObjective::finalize(const OrderedSet& variableOrdering,
     }
 
     // load library
+    // TODO(ianruh): I should probably call dlclose at some point
     void* sharedLib = dlopen(tempSharedObject.c_str(), RTLD_LAZY);
     if (!sharedLib) {
         std::stringstream msg;
