@@ -1,34 +1,36 @@
 # CPP MPC
 
-**Setup**
-`mamba create -n cppmpc -c conda-forge cmake eigen gmp gcc_linux-64 pybind11`
+Primarily a C++ rewrite of [SwiftMPC](https://github.com/ianruh/SwiftMPC) at
+the moment. Not all tests have been implemented, but the core solver works.
 
-**Dev Dependencies**
-- fd
-- clang-format
-- black
-- cpplint
-- ripgrep
-- fzf
+In addition, the biggest improvement is runtime code generation and compilation
+for the objective given the symbolic representation of the problem.
 
-**Python Wrappers Setup**
+## Getting Started
 
-Because of reasons, the [symengine.py]() python wrapper for symengine only
-supports the symengine commit hash listed in `symengine.py/symengine_version.txt`.
-So, the setup procedure needs to look something like this:
+Simply clone the repository, build, and run the tests. All dependencies except
+Eigen are downloaded by CMake:
 
-1. Clone symengine, and checkout the hash listed in `symengine.py/symengine_version.txt`
-2. Build and install symengine
-3. Clone symengine.py
-4. Run `python setup.py install` to compile the cython extension and install
-   the wrappers.
-5. Shed a tear for the two days I spent debugging before making sure the versions
-   were matched.
-6. Build cppmpc
-7. Run `pip install -e cppmpc_py/` if developing, otherwise just
-   `pip install cppmpc_py/`
-7. Run the python tests to make sure everything is hunky-dory.
+```
+$ git clone git@github.com:ianruh/cppmpc.git
+$ cd cppmpc/
+$ ./utils build
+$ ./utils test
+```
 
-**Compilation Options**
+### Adding to you project
+
+You can add the following to you CMake project:
+
+```
+FetchContent_Declare(
+    cppmpc
+    GIT_REPOSITORY git@github.com:ianruh/cppmpc.git
+)
+FetchContent_MakeAvailable(cppmpc)
+```
+
+### Compilation Options
+
 - `NO_VALIDATE_OBJECTIVE` Don't check the dimensions of the objective before 
   solving the problem. This can speed up the initialization time for the solver
